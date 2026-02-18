@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>속성 선택자 스마트 폼 레이아웃</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* PDF Page 7: Form 태그 CSS 예제 */
+        /* PDF Page 12: 속성 선택자(attribute) 및 우선순위(!important) 실습 */
+
+        .form-container {
+            max-width: 600px;
+            margin: 3rem auto;
+            background: #fff;
+            padding: 2.5rem;
+            border-radius: 1.25rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* PDF P.12 속성 선택자 활용 */
+        input[type="text"], 
+        input[type="email"], 
+        select, 
+        textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            margin-top: 0.5rem;
+            margin-bottom: 1.5rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 0.5rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        /* 특정 속성값이 있는 경우 스타일 (PDF P.12) */
+        input[required] {
+            border-left: 4px solid #6366f1;
+        }
+
+        /* 포커스 상태 우선순위 적용 (PDF P.12 !important 예시) */
+        input:focus {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
+        }
+
+        /* PDF P.7 Submit 버튼 스타일 */
+        button[type="submit"] {
+            width: 100%;
+            background-color: #6366f1;
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #4f46e5;
+            transform: translateY(-1px);
+        }
+
+        label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #475569;
+        }
+    </style>
+</head>
+<body class="bg-indigo-50 min-h-screen flex items-center justify-center p-4">
+
+    <div class="form-container">
+        <header class="mb-8">
+            <h2 class="text-2xl font-black text-slate-800">Contact Us</h2>
+            <p class="text-sm text-slate-500 mt-1">문의 사항을 남겨주시면 빠르게 답변드리겠습니다. (PDF P.7)</p>
+        </header>
+
+        <form>
+            <!-- PDF Page 7 구성 요소 재현 -->
+            <div>
+                <label for="name">Name</label>
+                <input type="text" id="name" placeholder="실명을 입력하세요" required>
+            </div>
+
+            <div>
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="example@domain.com" required>
+            </div>
+
+            <div>
+                <label for="country">Country</label>
+                <select id="country">
+                    <option value="kr">South Korea</option>
+                    <option value="us">United States</option>
+                    <option value="au">Australia (PDF Example)</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="subject">Subject</label>
+                <textarea id="subject" rows="4" placeholder="문의 내용을 상세히 적어주세요..."></textarea>
+            </div>
+
+            <button type="submit">Send Message</button>
+        </form>
+    </div>
+
+</body>
+</html>
