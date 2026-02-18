@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>글래스모피즘 네비게이션 & 헤더</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* PDF Page 3-4: Header 및 Navigation Bar 설계 */
+        /* PDF Page 11: vh, vw 단위 활용한 풀스크린 배경 */
+        
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Glassmorphism Effect */
+        .glass-header {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 1000px;
+            border-radius: 100px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .glass-header:hover {
+            background: rgba(255, 255, 255, 0.25);
+            width: 95%;
+        }
+
+        .nav-link {
+            position: relative;
+            padding: 0.5rem 1rem;
+            color: white;
+            transition: 0.3s;
+        }
+
+        /* PDF P.12: pseudo-element 사용 */
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: white;
+            transition: 0.3s;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after { width: 80%; }
+
+        .hero-section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            padding: 0 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Area (PDF Page 3) -->
+    <header class="glass-header px-8 py-4 flex justify-between items-center">
+        <div class="logo font-black text-xl tracking-tighter text-white uppercase">
+            ModernUI
+        </div>
+
+        <!-- Navigation Bar (PDF Page 4) -->
+        <nav class="hidden md:flex items-center gap-4">
+            <a href="#" class="nav-link text-sm font-semibold">Discovery</a>
+            <a href="#" class="nav-link text-sm font-semibold">Trending</a>
+            <a href="#" class="nav-link text-sm font-semibold">Premium</a>
+            <button class="ml-4 bg-white text-indigo-600 px-6 py-2 rounded-full text-xs font-bold shadow-lg hover:bg-indigo-50 transition">
+                Get Started
+            </button>
+        </nav>
+
+        <!-- Mobile Menu Icon (PDF Page 5) -->
+        <div class="md:hidden text-white">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </div>
+    </header>
+
+    <main class="hero-section">
+        <div>
+            <h2 class="text-5xl md:text-7xl font-black mb-6 tracking-tight">Design Future.</h2>
+            <p class="text-lg md:text-xl opacity-80 max-w-2xl mx-auto leading-relaxed">
+                PDF에서 학습한 가변 단위(vw, vh)와 Header/Nav 레이아웃을 <br class="hidden md:block">
+                최신 디자인 트렌드인 글래스모피즘으로 재해석한 결과물입니다.
+            </p>
+        </div>
+    </main>
+
+</body>
+</html>
