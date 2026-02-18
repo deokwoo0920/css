@@ -79,7 +79,18 @@
   }
 
   .submenu li {
+    width: 90%;
     margin-bottom: 12px;
+  }
+
+  .submenu li:first-child::before {
+    content: "";
+    display: block;
+    height: 1px;
+    margin-top: 8px;
+    margin-bottom: 14px;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+
   }
 
   .submenu a {
@@ -122,13 +133,13 @@
     </li>
 
     <li>
-      <a href="./layout">layout 연습</a>
       <div class="toggle" onclick="toggleMenu()">
         layout 연습 확장 예제
         <span class="arrow" id="arrow">▶</span>
       </div>
 
       <ol class="submenu" id="submenu">
+        <li><a href="./layout">layout 연습</a></li>
         <li><a href="./layout/bentogrid01.html">Bento Grid 디자인</a></li>
         <li><a href="./layout/glassmorphism02.html">글래스모피즘</a></li>
         <li><a href="./layout/automaticnumbering03.html">CSS 자동 넘버링</a></li>
@@ -150,7 +161,7 @@ function toggleMenu() {
   if (submenu.style.height && submenu.style.height !== "0px") {
     submenu.style.height = "0";
   } else {
-    submenu.style.height = submenu.scrollHeight + "px";
+    submenu.style.height = submenu.scrollHeight  + "px";
   }
 
   arrow.classList.toggle("rotate");
