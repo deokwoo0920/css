@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS 고급 선택자 완벽 마스터 Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style id="live-user-style">
+        /* 사용자가 하단 에디터에 입력하는 CSS가 여기에 실시간으로 반영됩니다. */
+    </style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+        
+        .code-font { font-family: 'Fira Code', monospace; }
+        .preview-area { min-height: 300px; transition: all 0.3s ease; }
+        
+        /* 실습용 핵심 CSS (가상 요소 등) */
+        .ex-first-letter::first-letter { font-size: 3rem; font-weight: 900; color: #4f46e5; float: left; margin-right: 8px; line-height: 1; }
+        .ex-before-after::before { content: "【공지】"; color: #ef4444; font-weight: bold; margin-right: 5px; }
+        .ex-before-after::after { content: " → 자세히 보기"; font-size: 0.8rem; color: #6366f1; text-decoration: underline; cursor: pointer; }
+        
+        /* 속성 선택자 시각화 */
+        .attr-item { transition: all 0.2s; border: 2px solid #e5e7eb; }
+        .attr-item[data-type="image"] { border-color: #f87171; background-color: #fef2f2; }
+        .attr-item[data-type="video"] { border-color: #60a5fa; background-color: #eff6ff; }
+        .attr-item[data-status="done"] { text-decoration: line-through; opacity: 0.5; }
+        
+        /* 네비게이션 응용 */
+        .nav-vertical ul { display: flex; flex-direction: column; width: 200px; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+        .nav-vertical li { border-bottom: 1px solid #e5e7eb; }
+        .nav-vertical li:last-child { border-bottom: none; }
+        .nav-vertical a { display: block; padding: 12px 16px; background: white; transition: 0.3s; }
+        .nav-vertical a:hover { background: #f3f4f6; padding-left: 24px; color: #4f46e5; }
+
+        /* 하이라이트 효과 */
+        .highlight-focus { outline: 4px solid #facc15 !important; transform: scale(1.05); z-index: 10; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .struct-highlight { outline: 3px solid #f87171 !important; background-color: #fee2e2 !important; }
+        
+        .page-node { display: none; }
+        .page-node.active { display: block; animation: fadeIn 0.3s ease-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 에디터 스타일 */
+        #code-editor {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            color: #c7d2fe;
+            border: none;
+            outline: none;
+            resize: none;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen text-gray-800">
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- 왼쪽 사이드바: 메뉴 -->
+        <aside class="w-64 bg-slate-900 text-white flex flex-col">
+            <div class="p-6 border-b border-slate-800">
+                <h1 class="text-xl font-bold text-indigo-400">CSS Selector Lab</h1>
+                <p class="text-xs text-slate-400 mt-1">2026.02.18 Updated</p>
+            </div>
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-2">Basic & Structure</p>
+                <button id="btn-p1" onclick="changePage('p1', event)" class="nav-item w-full text-left px-4 py-2 rounded hover:bg-slate-800 transition text-sm">P.2-4 기본 선택자</button>
+                <button id="btn-p2" onclick="changePage('p2', event)" class="nav-item w-full text-left px-4 py-2 rounded hover:bg-slate-800 transition text-sm">P.5-7 계층 구조</button>
+                
+                <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold mt-6 mb-2">Interactions</p>
+                <button id="btn-p3" onclick="changePage('p3', event)" class="nav-item w-full text-left px-4 py-2 rounded hover:bg-slate-800 transition text-sm">P.8-11 가상 클래스/요소</button>
+                <button id="btn-p4" onclick="changePage('p4', event)" class="nav-item w-full text-left px-4 py-2 rounded hover:bg-slate-800 transition text-sm">P.12 속성 선택자</button>
+                
+                <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold mt-6 mb-2">Applications</p>
+                <button id="btn-p5" onclick="changePage('p5', event)" class="nav-item w-full text-left px-4 py-2 rounded hover:bg-slate-800 transition text-sm">P.13-14 응용 & 디자인</button>
+            </nav>
+            <div class="p-4 bg-slate-950 text-[10px] text-slate-500">
+                Status: Live Editor Active
+            </div>
+        </aside>
+
+        <!-- 오른쪽 메인: 콘텐츠 & 코드 뷰어 -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- 상단 정보 바 -->
+            <header class="h-16 bg-white border-b flex items-center justify-between px-8 shadow-sm">
+                <h2 id="page-title" class="text-lg font-bold text-slate-700">페이지 제목</h2>
+                <div class="flex items-center gap-4">
+                    <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded font-medium">Editor Mode</span>
+                    <button onclick="resetCurrentPage()" class="text-xs text-gray-500 hover:text-gray-800 underline">실습 초기화</button>
+                </div>
+            </header>
+
+            <!-- 실제 실습 영역 -->
+            <div class="flex-1 overflow-y-auto p-8 bg-slate-50/50">
+                <div id="content-container">
+                    
+                    <!-- P1: 선택자 기초 (업데이트: 실제 실습 대상 추가) -->
+                    <section id="p1" class="page-node">
+                        <div class="max-w-3xl mx-auto space-y-6">
+                            <div class="bg-white p-8 rounded-xl shadow-sm border text-center">
+                                <h3 class="text-xl font-bold mb-4 text-slate-800">선택자(Selector)의 기초 (P.2-4)</h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs mb-8">
+                                    <div class="p-4 border rounded bg-slate-50">
+                                        <p class="font-bold text-indigo-600 mb-2">태그 선택자</p>
+                                        <code class="block bg-white p-2 rounded">p { ... }</code>
+                                        <p class="mt-2 text-[10px] text-gray-500">HTML 태그를 직접 선택</p>
+                                    </div>
+                                    <div class="p-4 border rounded bg-slate-50">
+                                        <p class="font-bold text-green-600 mb-2">클래스 선택자</p>
+                                        <code class="block bg-white p-2 rounded">.classname { ... }</code>
+                                        <p class="mt-2 text-[10px] text-gray-500">점(.) + 클래스명으로 선택</p>
+                                    </div>
+                                    <div class="p-4 border rounded bg-slate-50">
+                                        <p class="font-bold text-red-600 mb-2">ID 선택자</p>
+                                        <code class="block bg-white p-2 rounded">#idname { ... }</code>
+                                        <p class="mt-2 text-[10px] text-gray-500">샵(#) + 아이디명으로 선택</p>
+                                    </div>
+                                </div>
+
+                                <!-- 실제 실습 구역 -->
+                                <div class="text-left border-t pt-8">
+                                    <p class="text-sm font-bold text-slate-500 mb-4 flex items-center gap-2">
+                                        <span class="w-2 h-2 bg-indigo-500 rounded-full"></span>
+                                        실습 대상 (아래 요소를 에디터에서 꾸며보세요!)
+                                    </p>
+                                    <div class="space-y-4">
+                                        <div class="p-4 bg-white border rounded shadow-sm">
+                                            <p class="text-sm">이 문장은 <strong class="bg-indigo-100 px-1 rounded">p</strong> 태그 자체입니다.</p>
+                                        </div>
+                                        <div class="classname p-4 bg-white border rounded shadow-sm">
+                                            <p class="text-sm">이 영역의 클래스 이름은 <strong class="bg-green-100 px-1 rounded">.classname</strong> 입니다.</p>
+                                        </div>
+                                        <div id="idname" class="p-4 bg-white border rounded shadow-sm">
+                                            <p class="text-sm">이 영역의 아이디 이름은 <strong class="bg-red-100 px-1 rounded">#idname</strong> 입니다.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- P2: 계층 구조 -->
+                    <section id="p2" class="page-node">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border mb-6">
+                            <h3 class="font-bold mb-2">계층 및 인접 선택자 실습 (P.5-7)</h3>
+                            <p class="text-sm text-gray-500 mb-6">부모와 자식, 형제 관계를 이용해 원하는 요소를 정확히 선택합니다.</p>
+                            
+                            <div id="struct-area" class="p-6 border-2 border-slate-100 rounded-xl bg-slate-50/50 mb-6">
+                                <article class="p-4 bg-white border rounded shadow-sm">
+                                    <h2 class="text-xl font-bold mb-3 border-b pb-1">Article 제목 (h2)</h2>
+                                    <section class="p-3 border border-indigo-100 bg-indigo-50/30 rounded mb-4">
+                                        <h3 class="font-bold text-indigo-800">Section 1 (자식)</h3>
+                                        <ul class="list-disc ml-6 mt-2 space-y-1">
+                                            <li>항목 1 (li)</li>
+                                            <li>항목 2 (li)</li>
+                                        </ul>
+                                    </section>
+                                    <div class="h-px bg-slate-200 my-4"></div>
+                                    <section class="p-3 border border-indigo-100 bg-indigo-50/30 rounded">
+                                        <h3 class="font-bold text-indigo-800">Section 2 (자식)</h3>
+                                        <p class="mt-2 text-sm italic">인접 섹션의 설명 텍스트 (p)</p>
+                                    </section>
+                                </article>
+                            </div>
+
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                <button onclick="setEditorCode('article section ul { color: red; font-weight: bold; }')" class="bg-slate-100 hover:bg-slate-200 p-2 rounded text-[11px] font-mono">article section ul (하위)</button>
+                                <button onclick="setEditorCode('article > section { border: 4px solid #4f46e5; }')" class="bg-slate-100 hover:bg-slate-200 p-2 rounded text-[11px] font-mono">article > section (자식)</button>
+                                <button onclick="setEditorCode('h2 + section { background-color: #fef08a; }')" class="bg-slate-100 hover:bg-slate-200 p-2 rounded text-[11px] font-mono">h2 + section (인접)</button>
+                                <button onclick="setEditorCode('h2 ~ section { opacity: 0.5; }')" class="bg-slate-100 hover:bg-slate-200 p-2 rounded text-[11px] font-mono">h2 ~ section (형제)</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- P3: 가상 선택자 -->
+                    <section id="p3" class="page-node space-y-8">
+                        <div class="grid lg:grid-cols-2 gap-8">
+                            <div class="space-y-6">
+                                <div class="bg-white p-6 rounded-xl shadow-sm border">
+                                    <h3 class="font-bold mb-4 text-indigo-600">순서 가상 클래스 시뮬레이터</h3>
+                                    <p class="text-xs text-gray-500 mb-4"><code>nth-child(n)</code>의 원리를 숫자를 바꿔보며 이해하세요.</p>
+                                    <div class="flex items-center gap-4 mb-6">
+                                        <label class="text-sm font-bold">n 값 변경:</label>
+                                        <input type="number" id="nth-n" value="2" min="1" max="6" oninput="updateNthChild()" class="w-16 border rounded px-2 py-1 outline-none focus:ring-2 ring-indigo-500">
+                                        <span class="text-xs font-mono bg-indigo-50 text-indigo-700 px-2 py-1 rounded">li:nth-child(<span id="n-val">2</span>)</span>
+                                    </div>
+                                    <ul id="nth-list" class="space-y-2">
+                                        <li class="p-3 bg-gray-50 border rounded text-sm transition-all border-l-4 border-l-transparent">아이템 1</li>
+                                        <li class="p-3 bg-gray-50 border rounded text-sm transition-all border-l-4 border-l-transparent">아이템 2</li>
+                                        <li class="p-3 bg-gray-50 border rounded text-sm transition-all border-l-4 border-l-transparent">아이템 3</li>
+                                        <li class="p-3 bg-gray-50 border rounded text-sm transition-all border-l-4 border-l-transparent">아이템 4</li>
+                                        <li class="p-3 bg-gray-50 border rounded text-sm transition-all border-l-4 border-l-transparent">아이템 5</li>
+                                        <li class="p-3 bg-gray-50 border rounded text-sm transition-all border-l-4 border-l-transparent">아이템 6</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="space-y-6">
+                                <div class="bg-white p-6 rounded-xl shadow-sm border">
+                                    <h3 class="font-bold mb-4 text-indigo-600">가상 요소 (::before/after)</h3>
+                                    <div class="p-4 border-2 border-dashed rounded-lg bg-slate-50">
+                                        <p class="ex-first-letter mb-4">가상 요소를 사용하면 HTML 코드를 직접 수정하지 않고도 디자인 요소를 추가할 수 있습니다.</p>
+                                        <div class="clear-both"></div>
+                                        <div class="ex-before-after p-3 bg-white border rounded shadow-sm inline-block">
+                                            오늘의 수업 공지사항입니다.
+                                        </div>
+                                    </div>
+                                    <button onclick="setEditorCode('.ex-before-after::before {\n  content: \'【중요】\';\n  color: blue;\n}')" class="mt-4 w-full bg-indigo-50 text-indigo-600 p-2 rounded text-xs font-bold hover:bg-indigo-100 transition">에디터에 코드 불러오기</button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- P4: 속성 선택자 -->
+                    <section id="p4" class="page-node space-y-8">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border">
+                            <h3 class="font-bold mb-2">파일 관리자 시뮬레이션 [속성 선택자 실습]</h3>
+                            <p class="text-sm text-gray-500 mb-6">확장자나 데이터 속성에 따라 스타일을 다르게 부여하는 실무 기법입니다.</p>
+                            
+                            <div class="grid md:grid-cols-3 gap-4 mb-8" id="attr-area">
+                                <div class="attr-item p-4 border rounded-lg text-center" data-type="image" title="vacation-photo">
+                                    <div class="text-2xl mb-1">🖼️</div>
+                                    <p class="text-xs font-bold">photo.jpg</p>
+                                    <span class="text-[10px] text-gray-400 font-mono">data-type="image"</span>
+                                </div>
+                                <div class="attr-item p-4 border rounded-lg text-center" data-type="video" title="lecture-movie">
+                                    <div class="text-2xl mb-1">🎬</div>
+                                    <p class="text-xs font-bold">lesson.mp4</p>
+                                    <span class="text-[10px] text-gray-400 font-mono">data-type="video"</span>
+                                </div>
+                                <div class="attr-item p-4 border rounded-lg text-center" data-type="doc" data-status="done">
+                                    <div class="text-2xl mb-1">📄</div>
+                                    <p class="text-xs font-bold">report.pdf</p>
+                                    <span class="text-[10px] text-gray-400 font-mono">data-status="done"</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                <button onclick="setEditorCode('[data-type=\'image\'] { \n  background-color: #fef2f2; \n  border-color: #ef4444; \n}')" class="bg-slate-100 hover:bg-slate-200 p-2 rounded text-xs font-mono">[type='image']</button>
+                                <button onclick="setEditorCode('[data-type=\'video\'] { \n  transform: scale(1.1); \n  box-shadow: 0 10px 15px rgba(0,0,0,0.1); \n}')" class="bg-slate-100 hover:bg-slate-200 p-2 rounded text-xs font-mono">[type='video']</button>
+                                <button onclick="setEditorCode('[data-status=\'done\'] { \n  opacity: 0.3; \n  filter: grayscale(1); \n}')" class="bg-slate-100 hover:bg-slate-200 p-2 rounded text-xs font-mono">[status='done']</button>
+                                <button onclick="setEditorCode('[title^=\'vacation\'] { \n  outline: 4px solid #10b981; \n}')" class="bg-slate-100 hover:bg-slate-200 p-2 rounded text-xs font-mono">[title^='vacation']</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- P5: 응용 -->
+                    <section id="p5" class="page-node space-y-8">
+                        <div class="grid lg:grid-cols-2 gap-8">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border">
+                                <h3 class="font-bold mb-4">다양한 네비게이션 형태</h3>
+                                <div class="space-y-8">
+                                    <div>
+                                        <p class="text-xs font-bold text-gray-400 mb-2">VERTICAL MENU (P.14 응용)</p>
+                                        <nav class="nav-vertical">
+                                            <ul>
+                                                <li><a href="#">대시보드</a></li>
+                                                <li><a href="#">사용자 관리</a></li>
+                                                <li><a href="#">콘텐츠 분석</a></li>
+                                                <li><a href="#">시스템 설정</a></li>
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                    <button onclick="setEditorCode('.nav-vertical a:hover {\n  background: #4f46e5;\n  color: white;\n  padding-left: 30px;\n}')" class="w-full bg-slate-900 text-white p-2 rounded text-xs font-bold">호버 효과 에디터로 가져오기</button>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl shadow-sm border">
+                                <h3 class="font-bold mb-4">카드 UI (호버 마스크)</h3>
+                                <div class="group relative w-full h-64 overflow-hidden rounded-xl bg-slate-200 shadow-md card-target">
+                                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=500" alt="아트" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                    <div class="absolute inset-0 bg-indigo-900/0 group-hover:bg-indigo-900/70 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100 backdrop-blur-[2px]">
+                                        <div class="text-center text-white p-6">
+                                            <h4 class="font-bold text-xl mb-2">상세 정보 확인</h4>
+                                            <p class="text-sm opacity-90">CSS를 통해 마스크 효과를 제어합니다.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-4 leading-relaxed italic">
+                                    * 아래 에디터에서 .card-target { filter: blur(2px); } 등을 입력해 보세요.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- 하단 라이브 코드 에디터 -->
+            <footer class="h-48 bg-slate-900 p-4 px-8 flex flex-col border-t-4 border-green-500">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Live CSS Editor (Type here!)</span>
+                    </div>
+                    <span class="text-[10px] text-slate-500">에디터에 입력한 코드가 즉시 상단 화면에 반영됩니다.</span>
+                </div>
+                <div class="flex-1 bg-slate-950 p-3 rounded border border-slate-800 shadow-inner overflow-hidden">
+                    <textarea id="code-editor" spellcheck="false" placeholder="/* 여기에 CSS를 입력해 실습해보세요. */\n\narticle {\n  border-color: indigo;\n}"></textarea>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        const pageData = {
+            p1: { title: "1. 선택자의 기본 (P.2-4)", code: "/* 태그 선택자 실습 */\np {\n  font-size: 20px;\n  color: #4f46e5;\n}\n\n/* 클래스 선택자 실습 */\n.classname {\n  background-color: #f0fdf4;\n  border: 2px dashed #22c55e;\n}\n\n/* ID 선택자 실습 */\n#idname {\n  background-color: #fef2f2;\n  border: 2px solid #ef4444;\n}" },
+            p2: { title: "2. 계층 구조 선택자 (P.5-7)", code: "/* 자식 선택자 실습 */\narticle > section {\n  border: 2px solid #6366f1;\n  padding: 20px;\n  border-radius: 10px;\n}" },
+            p3: { title: "3. 가상 선택자 시뮬레이션 (P.8-11)", code: "/* n번째 아이템 강조 */\nli:nth-child(2) {\n  background: #fde68a !important;\n  border-left: 5px solid #fbbf24 !important;\n}" },
+            p4: { title: "4. 속성 선택자 활용 (P.12)", code: "/* 속성 선택자 실습 */\n[data-type='video'] {\n  background: #eff6ff;\n  border-color: #3b82f6;\n}" },
+            p5: { title: "5. 실무 응용 & 디자인 (P.13-14)", code: "/* 호버 애니메이션 */\n.nav-vertical a:hover {\n  padding-left: 25px;\n  background: #f3f4f6;\n}" }
+        };
+
+        const editor = document.getElementById('code-editor');
+        const styleTag = document.getElementById('live-user-style');
+
+        // 에디터 입력 시 스타일 반영
+        editor.addEventListener('input', () => {
+            styleTag.innerHTML = editor.value;
+        });
+
+        // 수동으로 에디터 코드 설정하는 함수
+        function setEditorCode(code) {
+            editor.value = code;
+            styleTag.innerHTML = code;
+        }
+
+        /**
+         * 페이지 전환 함수
+         */
+        function changePage(pageId, event = null) {
+            document.querySelectorAll('.page-node').forEach(node => node.classList.remove('active'));
+            
+            const activePage = document.getElementById(pageId);
+            if(activePage) {
+                activePage.classList.add('active');
+            }
+
+            document.getElementById('page-title').textContent = pageData[pageId].title;
+            
+            // 페이지 전환 시 기본 예제 코드를 에디터에 채워줌
+            setEditorCode(pageData[pageId].code);
+
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'font-bold');
+            });
+
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('bg-indigo-600', 'text-white', 'font-bold');
+            } else {
+                const targetBtn = document.getElementById(`btn-${pageId}`);
+                if (targetBtn) {
+                    targetBtn.classList.add('bg-indigo-600', 'text-white', 'font-bold');
+                }
+            }
+
+            if(pageId === 'p3') updateNthChild();
+        }
+
+        // P3: nth-child 실습 로직
+        function updateNthChild() {
+            const nInput = document.getElementById('nth-n');
+            const nValSpan = document.getElementById('n-val');
+            if(!nInput) return;
+
+            const n = nInput.value;
+            nValSpan.textContent = n;
+            const items = document.querySelectorAll('#nth-list li');
+            
+            items.forEach((item, index) => {
+                item.style.backgroundColor = '';
+                item.style.fontWeight = '';
+                item.style.transform = '';
+                item.style.borderLeftColor = 'transparent';
+                
+                if (index + 1 == n) {
+                    item.style.backgroundColor = '#fde68a';
+                    item.style.fontWeight = 'bold';
+                    item.style.transform = 'translateX(10px)';
+                    item.style.borderLeftColor = '#fbbf24';
+                }
+            });
+        }
+
+        function resetCurrentPage() {
+            const activeNode = document.querySelector('.page-node.active');
+            if(activeNode) changePage(activeNode.id);
+        }
+
+        window.onload = function() {
+            changePage('p1');
+        };
+    </script>
+</body>
+</html>
