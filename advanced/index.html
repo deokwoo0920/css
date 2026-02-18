@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS 고급 활용 & 레이아웃 마스터 Lab (확장판)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+        
+        .code-font { font-family: 'Fira Code', monospace; }
+        
+        /* 기본 레이아웃 스타일 */
+        .preview-box { background: white; border: 1px solid #e2e8f0; border-radius: 1rem; padding: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .target-label { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 0.5rem; display: block; }
+        
+        /* [PDF 03/05] Counter & Sibling */
+        .counter-area-preview { counter-reset: main-idx; }
+        .counter-item-preview::before {
+            counter-increment: main-idx;
+            content: "Step " counter(main-idx) ". ";
+            color: #6366f1; font-weight: bold;
+        }
+
+        /* [PDF 06] Advanced Visuals */
+        .border-image-target { border: 15px solid transparent; padding: 15px; }
+        .multi-bg-target { height: 150px; border-radius: 1rem; border: 1px solid #e2e8f0; }
+
+        /* [PDF 08] Flex & Grid */
+        .flex-container-preview { display: flex; gap: 10px; background: #f8fafc; padding: 15px; border-radius: 0.5rem; min-height: 100px; }
+        .flex-item-preview { width: 50px; height: 50px; background: #6366f1; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 0.25rem; transition: all 0.3s; }
+        
+        .grid-container-preview { display: grid; gap: 10px; }
+        .grid-item-preview { background: #94a3b8; color: white; padding: 10px; border-radius: 4px; text-align: center; font-size: 12px; font-weight: bold; }
+
+        /* [PDF 06] 3D Transform Parent */
+        .scene { width: 100px; height: 100px; perspective: 600px; margin: 20px auto; }
+        .cube { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 1s; }
+        .cube__face { position: absolute; width: 100px; height: 100px; border: 2px solid white; line-height: 100px; font-size: 20px; font-weight: bold; color: white; text-align: center; opacity: 0.8; }
+        .cube__face--front  { background: #ef4444; transform: rotateY(  0deg) translateZ(50px); }
+        .cube__face--back   { background: #3b82f6; transform: rotateY(180deg) translateZ(50px); }
+        .cube__face--right  { background: #10b981; transform: rotateY( 90deg) translateZ(50px); }
+        .cube__face--left   { background: #f59e0b; transform: rotateY(-90deg) translateZ(50px); }
+        .cube__face--top    { background: #8b5cf6; transform: rotateX( 90deg) translateZ(50px); }
+        .cube__face--bottom { background: #ec4899; transform: rotateX(-90deg) translateZ(50px); }
+
+        /* 페이지 전환 애니메이션 */
+        .page-node { display: none; }
+        .page-node.active { display: block; animation: fadeIn 0.3s ease-out; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #code-editor {
+            width: 100%; height: 100%; background: transparent; color: #c7d2fe;
+            border: none; outline: none; resize: none; font-family: 'Fira Code', monospace;
+            font-size: 13px; line-height: 1.6;
+        }
+    </style>
+    <!-- 실시간 사용자 스타일 반영 -->
+    <style id="live-master-style"></style>
+</head>
+<body class="bg-gray-100 h-screen overflow-hidden flex flex-col">
+
+    <!-- 상단 헤더 -->
+    <header class="h-16 bg-slate-900 text-white flex items-center justify-between px-6 shrink-0 shadow-xl z-50">
+        <div class="flex items-center gap-6">
+            <div class="shrink-0 border-r border-slate-700 pr-6">
+                <h1 class="text-lg font-bold text-indigo-400">Advanced CSS Master Lab</h1>
+                <p class="text-[9px] text-slate-500 uppercase tracking-widest">2026-02-18 Pro Edition</p>
+            </div>
+            
+            <nav class="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-[60vw]">
+                <button id="btn-sel" onclick="changePage('sel', event)" class="nav-item whitespace-nowrap px-3 py-1.5 rounded-md hover:bg-slate-800 transition text-xs font-medium text-slate-300">선택자/속성/카운터</button>
+                <button id="btn-box" onclick="changePage('box', event)" class="nav-item whitespace-nowrap px-3 py-1.5 rounded-md hover:bg-slate-800 transition text-xs font-medium text-slate-300">박스/배경/보더</button>
+                <button id="btn-vis" onclick="changePage('vis', event)" class="nav-item whitespace-nowrap px-3 py-1.5 rounded-md hover:bg-slate-800 transition text-xs font-medium text-slate-300">시각효과/그림자</button>
+                <button id="btn-lay" onclick="changePage('lay', event)" class="nav-item whitespace-nowrap px-3 py-1.5 rounded-md hover:bg-slate-800 transition text-xs font-medium text-slate-300">레이아웃(Flex/Grid)</button>
+                <button id="btn-ani" onclick="changePage('ani', event)" class="nav-item whitespace-nowrap px-3 py-1.5 rounded-md hover:bg-slate-800 transition text-xs font-medium text-slate-300">2D/3D/애니메이션</button>
+                <button id="btn-comp" onclick="changePage('comp', event)" class="nav-item whitespace-nowrap px-3 py-1.5 rounded-md hover:bg-slate-800 transition text-xs font-medium text-slate-300">UI 컴포넌트/폼</button>
+            </nav>
+        </div>
+
+        <button onclick="resetCurrentPage()" class="text-[10px] text-slate-400 hover:text-white bg-slate-800 px-3 py-1.5 rounded border border-slate-700 transition flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            초기화
+        </button>
+    </header>
+
+    <!-- 메인 레이아웃 -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- [왼쪽] 실습 프리뷰 -->
+        <div class="flex-1 overflow-y-auto p-8 bg-slate-50/50 shadow-inner" id="preview-scroll">
+            <div id="content-container" class="max-w-4xl mx-auto space-y-10">
+                
+                <!-- 1. 선택자/속성/카운터 (PDF 03, 12) -->
+                <section id="sel" class="page-node space-y-6">
+                    <div class="preview-box">
+                        <h3 class="text-xl font-bold mb-4 text-slate-800 border-b pb-2 tracking-tight">계층/속성 선택자 & 카운터</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-4">
+                                <span class="target-label">Sibling & Adjacent 테스트 (PDF 03)</span>
+                                <div class="sibling-sandbox space-y-2">
+                                    <h4 class="font-bold text-sm">H4 제목</h4>
+                                    <p class="p-2 bg-slate-100 rounded text-xs">문장 1 (h4 + p 인접)</p>
+                                    <p class="p-2 bg-slate-100 rounded text-xs">문장 2 (h4 ~ p 형제)</p>
+                                    <p class="p-2 bg-slate-100 rounded text-xs">문장 3 (h4 ~ p 형제)</p>
+                                </div>
+                                <span class="target-label mt-6">Attribute 패턴 매칭 (PDF 12)</span>
+                                <div class="attr-sandbox flex flex-wrap gap-2">
+                                    <a href="data/manual.pdf" class="px-3 py-1 bg-slate-200 rounded text-[10px]" title="download-file">manual.pdf</a>
+                                    <a href="data/image.jpg" class="px-3 py-1 bg-slate-200 rounded text-[10px]" title="view-image">image.jpg</a>
+                                    <a href="data/archive.zip" class="px-3 py-1 bg-slate-200 rounded text-[10px]" title="download-backup">archive.zip</a>
+                                </div>
+                            </div>
+                            <div class="counter-area-preview">
+                                <span class="target-label">CSS Counter 자동 넘버링 (PDF 05)</span>
+                                <div class="space-y-2">
+                                    <div class="counter-item-preview p-3 bg-white border rounded shadow-sm text-xs">레이아웃의 기본 이해</div>
+                                    <div class="counter-item-preview p-3 bg-white border rounded shadow-sm text-xs">헤더와 네비게이션바 구성</div>
+                                    <div class="counter-item-preview p-3 bg-white border rounded shadow-sm text-xs">메인 콘텐츠 영역 디자인</div>
+                                    <div class="counter-item-preview p-3 bg-white border rounded shadow-sm text-xs">푸터 및 저작권 표시</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. 박스/배경/보더 (PDF 06, 08) -->
+                <section id="box" class="page-node space-y-6">
+                    <div class="preview-box">
+                        <h3 class="text-xl font-bold mb-4 text-slate-800 border-b pb-2 tracking-tight">Advanced Box Model & Styling</h3>
+                        <div class="space-y-8">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <span class="target-label">Border Radius & Border Image (PDF 06)</span>
+                                    <div class="border-image-target bg-slate-50 border-8 text-xs font-medium text-center italic">
+                                        Border Image 실습 (에디터에서 source 입력)
+                                    </div>
+                                    <div class="mt-4 flex gap-2">
+                                        <div class="w-12 h-12 bg-indigo-500 rounded-tl-[50px] rounded-br-[50px]" title="타원형 코너"></div>
+                                        <div class="w-12 h-12 bg-indigo-300 rounded-[50%]" title="완전 원형"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="target-label">Multi-Background & Size (PDF 06)</span>
+                                    <div class="multi-bg-target p-4 flex items-end">
+                                        <p class="text-[10px] text-white font-bold bg-black/30 p-1 rounded">다중 배경 이미지 테스트 영역</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6 bg-slate-900 rounded-xl text-indigo-300 text-xs code-font">
+                                <span class="text-slate-500">// background-origin, clip 실습 가능</span><br>
+                                .multi-bg-target { background: url(...) left top, url(...) right bottom; }
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. 시각효과/그림자 (PDF 06) -->
+                <section id="vis" class="page-node space-y-6">
+                    <div class="preview-box">
+                        <h3 class="text-xl font-bold mb-4 text-slate-800 border-b pb-2 tracking-tight">Gradients & Shadows Mastery</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-6">
+                                <span class="target-label">Linear & Radial Gradients (PDF 06)</span>
+                                <div class="linear-gradient-target h-24 rounded-lg shadow-inner"></div>
+                                <div class="radial-gradient-target h-24 rounded-lg shadow-inner"></div>
+                            </div>
+                            <div class="space-y-6">
+                                <span class="target-label">Complex Shadows (PDF 06)</span>
+                                <div class="box-shadow-target h-24 bg-white border rounded-lg flex items-center justify-center font-black text-slate-400">
+                                    BOX SHADOW
+                                </div>
+                                <div class="text-shadow-target text-center text-3xl font-black py-4">
+                                    SHADOW TEXT
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. 레이아웃 (Flex/Grid) (PDF 05, 08) -->
+                <section id="lay" class="page-node space-y-6">
+                    <div class="preview-box">
+                        <h3 class="text-xl font-bold mb-4 text-slate-800 border-b pb-2 tracking-tight">Flexbox & Grid Layouts</h3>
+                        <div class="space-y-8">
+                            <div>
+                                <span class="target-label">Flex Container & Item (PDF 08)</span>
+                                <div class="flex-container-preview">
+                                    <div class="flex-item-preview">1</div>
+                                    <div class="flex-item-preview">2</div>
+                                    <div class="flex-item-preview">3</div>
+                                    <div class="flex-item-preview">4</div>
+                                    <div class="flex-item-preview">5</div>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="target-label">Grid Layout (PDF 05)</span>
+                                <div class="grid-container-preview">
+                                    <div class="grid-item-preview col-span-3">Header</div>
+                                    <div class="grid-item-preview row-span-2">Nav</div>
+                                    <div class="grid-item-preview col-span-2 h-20">Main Content</div>
+                                    <div class="grid-item-preview">Sidebar</div>
+                                    <div class="grid-item-preview">Ad</div>
+                                    <div class="grid-item-preview col-span-3">Footer</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. 2D/3D 애니메이션 (PDF 06) -->
+                <section id="ani" class="page-node space-y-6">
+                    <div class="preview-box">
+                        <h3 class="text-xl font-bold mb-4 text-slate-800 border-b pb-2 tracking-tight">Transform & Keyframe Animations</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
+                            <div class="text-center">
+                                <span class="target-label">3D Transform (PDF 06 P.16)</span>
+                                <div class="scene">
+                                    <div class="cube" id="cube">
+                                        <div class="cube__face cube__face--front">1</div>
+                                        <div class="cube__face cube__face--back">2</div>
+                                        <div class="cube__face cube__face--right">3</div>
+                                        <div class="cube__face cube__face--left">4</div>
+                                        <div class="cube__face cube__face--top">5</div>
+                                        <div class="cube__face cube__face--bottom">6</div>
+                                    </div>
+                                </div>
+                                <p class="text-[10px] text-slate-400 mt-2 italic">마우스를 올려 회전시켜보세요.</p>
+                            </div>
+                            <div class="flex flex-col items-center justify-center space-y-4">
+                                <span class="target-label">Keyframes Animation (PDF 06 P.17)</span>
+                                <div class="ani-box w-16 h-16 bg-pink-500 rounded-lg shadow-lg"></div>
+                                <div class="ani-box-2 w-16 h-16 bg-blue-500 rounded-full shadow-lg"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. UI 컴포넌트/폼 (PDF 07, 08) -->
+                <section id="comp" class="page-node space-y-6">
+                    <div class="preview-box">
+                        <h3 class="text-xl font-bold mb-4 text-slate-800 border-b pb-2 tracking-tight">Components, Forms & Media Queries</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-6">
+                                <span class="target-label">Smart Form & Attribute Selectors (PDF 07)</span>
+                                <form class="space-y-3">
+                                    <input type="text" placeholder="Your Name" class="w-full p-2 border rounded-md text-xs focus:ring-2 ring-indigo-500 outline-none" required>
+                                    <input type="email" placeholder="Email Address" class="w-full p-2 border rounded-md text-xs" required>
+                                    <button type="submit" class="w-full py-2 bg-indigo-600 text-white font-bold rounded-md text-xs hover:bg-indigo-700 transition">SEND</button>
+                                </form>
+                                <span class="target-label">Pagination & Dropdown (PDF 07)</span>
+                                <div class="flex gap-1 justify-center pagination-target">
+                                    <button class="px-2 py-1 border rounded hover:bg-slate-100 text-[10px]">«</button>
+                                    <button class="px-2 py-1 border rounded bg-indigo-600 text-white text-[10px]">1</button>
+                                    <button class="px-2 py-1 border rounded hover:bg-slate-100 text-[10px]">2</button>
+                                    <button class="px-2 py-1 border rounded hover:bg-slate-100 text-[10px]">3</button>
+                                    <button class="px-2 py-1 border rounded hover:bg-slate-100 text-[10px]">»</button>
+                                </div>
+                            </div>
+                            <div class="media-query-target p-6 rounded-xl border-4 border-dashed flex items-center justify-center text-center">
+                                <div>
+                                    <span class="target-label">Responsive Media Test (PDF 08)</span>
+                                    <p class="text-[10px] font-bold text-slate-500">화면 크기를 줄이면<br>이 박스의 색상이 바뀝니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+
+        <!-- [오른쪽] 라이브 CSS 에디터 -->
+        <aside class="w-[450px] bg-slate-900 flex flex-col shrink-0 border-l-4 border-indigo-500 shadow-2xl overflow-hidden relative">
+            <div class="p-4 border-b border-slate-800 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"></div>
+                    <span class="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Global Master Editor</span>
+                </div>
+                <div class="text-[9px] text-slate-500 font-mono">Real-time Injection</div>
+            </div>
+
+            <div class="flex-1 p-4 bg-slate-950/50 overflow-hidden">
+                <textarea id="code-editor" spellcheck="false" placeholder="/* 이곳에 CSS를 입력하여 실습하세요. */"></textarea>
+            </div>
+
+            <div class="p-4 bg-slate-900 border-t border-slate-800 shrink-0">
+                <div class="flex flex-col gap-2">
+                    <p class="text-[10px] text-slate-400 leading-relaxed">
+                        <span class="text-indigo-400 font-bold">TIP:</span> <code class="text-indigo-300">!important</code>를 활용해 기본 테마를 덮어쓰세요.
+                    </p>
+                    <div class="flex gap-2">
+                         <button onclick="insertTemplate()" class="text-[9px] bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-500">현재 탭 템플릿 삽입</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+    </main>
+
+    <script>
+        const pageConfigs = {
+            sel: {
+                title: "선택자/속성/카운터 실습",
+                code: "/* 인접 선택자 (+) & 형제 선택자 (~) */\nh4 + p { background: #fee2e2 !important; border-left: 4px solid #ef4444 !important; }\nh4 ~ p { color: #4f46e5 !important; }\n\n/* 속성 선택자 패턴 매칭 (PDF 12) */\na[href$='.pdf'] { background: #fef3c7 !important; }\na[title^='view'] { border: 1px solid #10b981 !important; }\n\n/* 카운터 스타일 (PDF 05) */\n.counter-item-preview::before {\n  content: 'Lecture ' counter(main-idx, decimal-leading-zero) ' : ' !important;\n  color: #6366f1 !important;\n}"
+            },
+            box: {
+                title: "박스/배경/보더 실습",
+                code: "/* 타원형 보더 래디우스 (PDF 06 P.3) */\n.border-image-target {\n  border-radius: 50px / 20px !important;\n  background: #f8fafc !important;\n}\n\n/* 다중 배경 이미지 (PDF 06 P.5) */\n.multi-bg-target {\n  background: linear-gradient(45deg, rgba(99,102,241,0.5), transparent), \n              url('https://picsum.photos/id/10/400/150') center/cover !important;\n}\n\n/* 보더 이미지 (PDF 06 P.4) */\n/* 소스 이미지가 없으므로 border-style 변경으로 대체 테스트 가능 */\n.border-image-target {\n  border-style: double !important;\n  border-width: 10px !important;\n}"
+            },
+            vis: {
+                title: "시각효과/그림자 실습",
+                code: "/* 선형 그라데이션 (PDF 06) */\n.linear-gradient-target {\n  background: linear-gradient(135deg, #4f46e5 0%, #ec4899 100%) !important;\n}\n\n/* 방사형 그라데이션 (PDF 06 P.11) */\n.radial-gradient-target {\n  background: radial-gradient(circle at center, #fbbf24, #d97706) !important;\n}\n\n/* 다중 텍스트 그림자 (PDF 06 P.12) */\n.text-shadow-target {\n  color: #fff !important;\n  text-shadow: 1px 1px 0 #000, 3px 3px 0 rgba(0,0,0,0.2) !important;\n}"
+            },
+            lay: {
+                title: "레이아웃(Flex/Grid) 실습",
+                code: "/* 플렉스 아이템 정렬 (PDF 08 P.9) */\n.flex-container-preview {\n  justify-content: space-between !important;\n  align-items: baseline !important;\n}\n\n/* 그리드 영역 지정 (PDF 05 P.6) */\n.grid-container-preview {\n  grid-template-columns: 100px 1fr 150px !important;\n}\n\n.grid-item-preview {\n  border: 1px solid #cbd5e1 !important;\n}"
+            },
+            ani: {
+                title: "2D/3D 애니메이션 실습",
+                code: "/* 3D 큐브 회전 (PDF 06 P.16) */\n.cube:hover {\n  transform: rotateY(180deg) rotateX(45deg) !important;\n}\n\n/* 키프레임 애니메이션 (PDF 06 P.17) */\n@keyframes bounce {\n  0%, 100% { transform: translateY(0); }\n  50% { transform: translateY(-30px); }\n}\n\n.ani-box {\n  animation: bounce 1s infinite ease-in-out !important;\n}"
+            },
+            comp: {
+                title: "컴포넌트/폼 실습",
+                code: "/* 속성 선택자 기반 폼 스타일 (PDF 07 P.7) */\ninput[required]:valid {\n  border-color: #10b981 !important;\n}\n\n/* 페이지 매김 디자인 (PDF 07 P.8) */\n.pagination-target button:hover {\n  background: #4f46e5 !important;\n  color: #fff !important;\n}\n\n/* 미디어 쿼리 (PDF 08 P.13) */\n@media (max-width: 600px) {\n  .media-query-target {\n    background-color: #fee2e2 !important;\n    border-color: #ef4444 !important;\n  }\n}"
+            }
+        };
+
+        const editor = document.getElementById('code-editor');
+        const styleTag = document.getElementById('live-master-style');
+        let currentTab = 'sel';
+
+        editor.addEventListener('input', () => {
+            styleTag.innerHTML = editor.value;
+        });
+
+        function setEditorCode(code) {
+            editor.value = code;
+            styleTag.innerHTML = code;
+        }
+
+        function insertTemplate() {
+            setEditorCode(pageConfigs[currentTab].code);
+        }
+
+        function changePage(pageId, event = null) {
+            currentTab = pageId;
+            document.querySelectorAll('.page-node').forEach(node => node.classList.remove('active'));
+            const activePage = document.getElementById(pageId);
+            if(activePage) activePage.classList.add('active');
+
+            // 버튼 스타일 업데이트
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'hover:bg-indigo-500');
+                btn.classList.add('text-slate-300', 'hover:bg-slate-800');
+            });
+
+            const targetBtn = event ? event.currentTarget : document.getElementById(`btn-${pageId}`);
+            if (targetBtn) {
+                targetBtn.classList.remove('text-slate-300', 'hover:bg-slate-800');
+                targetBtn.classList.add('bg-indigo-600', 'text-white', 'hover:bg-indigo-500');
+            }
+
+            // 초기 코드 주입
+            insertTemplate();
+            
+            // 스크롤 초기화
+            document.getElementById('preview-scroll').scrollTop = 0;
+        }
+
+        function resetCurrentPage() {
+            const activeNode = document.querySelector('.page-node.active');
+            if(activeNode) changePage(activeNode.id);
+        }
+
+        window.onload = function() {
+            changePage('sel');
+        };
+    </script>
+</body>
+</html>
