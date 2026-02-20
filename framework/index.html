@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 11: CSS Framework Mastery Lab</title>
+    <!-- Tailwind CSS (현대적 프레임워크 예시로 활용) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+        
+        body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; background-color: #f8fafc; }
+        .code-font { font-family: 'Fira Code', monospace; }
+
+        /* 페이지 전환 애니메이션 */
+        .framework-node { display: none; }
+        .framework-node.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .lab-card { background: white; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .target-label { font-size: 10px; font-weight: 800; color: #6366f1; text-transform: uppercase; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 4px; }
+        .target-label::before { content: ''; width: 6px; height: 6px; background: currentColor; border-radius: 50%; }
+
+        /* 에디터 스타일 */
+        #code-editor { width: 100%; height: 100%; background: transparent; color: #bae6fd; border: none; outline: none; resize: none; font-size: 13px; line-height: 1.6; }
+        
+        /* 스크롤바 커스텀 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Pure CSS 비교용 스타일 */
+        .pure-button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+    <!-- 실시간 사용자 스타일 반영 -->
+    <style id="framework-live-style"></style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- 상단 헤더 -->
+    <header class="h-16 bg-slate-900 text-white flex items-center justify-between px-6 shrink-0 z-50 shadow-xl">
+        <div class="flex items-center gap-8">
+            <div class="flex flex-col">
+                <span class="text-[10px] text-indigo-400 font-bold tracking-widest uppercase">Chapter 11 Concepts</span>
+                <h1 class="text-lg font-black whitespace-nowrap tracking-tight">CSS Frameworks</h1>
+            </div>
+            <nav class="flex gap-2 overflow-x-auto no-scrollbar">
+                <button onclick="setTab('concept')" class="tab-btn px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap bg-slate-800 text-slate-400">1. 프레임워크 개념</button>
+                <button onclick="setTab('grid')" class="tab-btn px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap bg-slate-800 text-slate-400">2. Grid 시스템 비교</button>
+                <button onclick="setTab('component')" class="tab-btn px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap bg-slate-800 text-slate-400">3. 컴포넌트 실습</button>
+                <button onclick="setTab('utility')" class="tab-btn px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap bg-slate-800 text-slate-400">4. Utility-first 트렌드</button>
+            </nav>
+        </div>
+        <button onclick="resetLab()" class="text-[10px] font-bold text-slate-400 hover:text-white bg-slate-800 px-3 py-1.5 rounded border border-slate-700 transition">초기화</button>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden">
+        <!-- 왼쪽: 실습 프리뷰 -->
+        <div class="flex-1 overflow-y-auto p-6 lg:p-10" id="preview-area">
+            
+            <!-- 1. 프레임워크 개념 -->
+            <section id="concept" class="framework-node space-y-6">
+                <div class="lab-card">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">왜 프레임워크를 쓰는가?</h3>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div>
+                            <span class="target-label">Pure CSS 방식</span>
+                            <button class="pure-button">버튼 하나에 많은 CSS 필요</button>
+                            <p class="text-[10px] mt-2 text-slate-500">전통적으로 모든 속성을 하나하나 정의해야 함</p>
+                        </div>
+                        <div>
+                            <span class="target-label text-green-500">Framework 방식</span>
+                            <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded shadow-lg transition">클래스만 조합</button>
+                            <p class="text-[10px] mt-2 text-slate-500">이미 약속된 단어로 디자인 완성</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. Grid 시스템 비교 -->
+            <section id="grid" class="framework-node space-y-6">
+                <div class="lab-card">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">반응형 Grid 시스템</h3>
+                    <p class="text-sm text-slate-600 mb-6">프레임워크의 가장 큰 장점은 모바일 대응이 매우 쉽다는 것입니다.</p>
+                    
+                    <span class="target-label">Responsive Grid Preview</span>
+                    <div class="grid-container-target grid gap-4 p-4 bg-slate-100 rounded-lg">
+                        <div class="grid-col-target bg-indigo-500 text-white p-4 rounded text-center font-bold">1번 컬럼</div>
+                        <div class="grid-col-target bg-indigo-400 text-white p-4 rounded text-center font-bold">2번 컬럼</div>
+                        <div class="grid-col-target bg-indigo-300 text-white p-4 rounded text-center font-bold">3번 컬럼</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. 컴포넌트 실습 -->
+            <section id="component" class="framework-node space-y-6">
+                <div class="lab-card">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">Bootstrap 스타일 컴포넌트</h3>
+                    <div class="space-y-8">
+                        <div>
+                            <span class="target-label">Alert 컴포넌트</span>
+                            <div class="alert-target bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded" role="alert">
+                                <p class="font-bold">중요 알림</p>
+                                <p class="text-sm">프레임워크를 사용하면 이런 경고창을 즉시 만듭니다.</p>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="target-label">Card 컴포넌트</span>
+                            <div class="card-target max-w-xs rounded overflow-hidden shadow-xl bg-white border">
+                                <div class="w-full h-32 bg-slate-200 flex items-center justify-center text-slate-400">[Image Placeholder]</div>
+                                <div class="px-6 py-4">
+                                    <div class="font-bold text-xl mb-2">카드 제목</div>
+                                    <p class="text-gray-700 text-sm">카드 형태의 UI는 프레임워크의 핵심입니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. Utility-first 트렌드 -->
+            <section id="utility" class="framework-node space-y-6">
+                <div class="lab-card">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">최신 트렌드: Tailwind 스타일</h3>
+                    <p class="text-sm text-slate-600 mb-6">컴포넌트 단위를 넘어 원자(Atomic) 단위의 클래스를 조합합니다.</p>
+                    
+                    <div class="flex flex-wrap gap-4 items-center justify-center p-10 bg-slate-50 rounded-2xl border-2 border-dashed">
+                        <div class="utility-item-target p-8 bg-white rounded-full shadow-2xl flex items-center justify-center text-3xl">🚀</div>
+                        <div class="utility-text-target">
+                            <h4 class="text-2xl font-black text-slate-900">Framework 2026</h4>
+                            <p class="text-slate-500 font-medium italic">Type and change styles instantly.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- 오른쪽: 라이브 코드 에디터 -->
+        <aside class="w-[450px] bg-slate-900 border-l-4 border-indigo-500 flex flex-col shrink-0 shadow-2xl relative">
+            <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.5)]"></div>
+                    <span class="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Framework Style Editor</span>
+                </div>
+            </div>
+            
+            <div class="flex-1 p-5 bg-slate-950/50 overflow-hidden">
+                <textarea id="code-editor" spellcheck="false" class="code-font"></textarea>
+            </div>
+
+            <div class="p-5 bg-slate-900 border-t border-slate-800">
+                <div class="flex flex-col gap-2">
+                    <p class="text-[10px] text-slate-500 leading-relaxed italic">
+                        <span class="text-indigo-400 font-bold uppercase tracking-tighter mr-2">Tip:</span> 
+                        <span id="tab-hint">프레임워크의 클래스명을 상상하며 입력해 보세요.</span>
+                    </p>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        const tabConfigs = {
+            concept: {
+                hint: "기본적인 버튼 스타일을 에디터에서 수정해 보세요.",
+                code: "/* [1] Pure CSS 버튼 스타일 수정 */\n.pure-button {\n  background-color: #ef4444 !important; /* 빨간색으로 변경 */\n  border-radius: 50px !important; /* 둥글게 */\n  transition: 0.3s;\n}\n\n.pure-button:hover {\n  transform: scale(1.1);\n}"
+            },
+            grid: {
+                hint: "그리드 컬럼의 개수를 반응형으로 조절해 보세요.",
+                code: "/* [2] 프레임워크 그리드 제어 */\n.grid-container-target {\n  /* 기본 1열 */\n  grid-template-columns: 1fr !important;\n}\n\n@media (min-width: 640px) {\n  .grid-container-target {\n    /* 태블릿 이상 3열 */\n    grid-template-columns: repeat(3, 1fr) !important;\n  }\n}"
+            },
+            component: {
+                hint: "Bootstrap 스타일 알림창의 색상과 그림자를 바꿔보세요.",
+                code: "/* [3] 컴포넌트 디자인 커스터마이징 */\n.alert-target {\n  background-color: #dcfce7 !important; /* 성공(Success) 색상 */\n  border-color: #22c55e !important;\n  color: #166534 !important;\n}\n\n.card-target {\n  transform: translateY(-10px);\n  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;\n}"
+            },
+            utility: {
+                hint: "최신 Tailwind 스타일의 속성들을 조합해 보세요.",
+                code: "/* [4] Utility-first 스타일링 */\n.utility-item-target {\n  background: linear-gradient(135deg, #6366f1, #a855f7) !important;\n  animation: spin 3s linear infinite;\n}\n\n@keyframes spin {\n  from { transform: rotate(0deg); }\n  to { transform: rotate(360deg); }\n}\n\n.utility-text-target h4 {\n  letter-spacing: 5px;\n  color: #4f46e5 !important;\n}"
+            }
+        };
+
+        let activeTab = 'concept';
+        const editor = document.getElementById('code-editor');
+        const styleTag = document.getElementById('framework-live-style');
+
+        function setTab(id) {
+            activeTab = id;
+            document.querySelectorAll('.framework-node').forEach(node => node.classList.remove('active'));
+            const targetNode = document.getElementById(id);
+            if (targetNode) targetNode.classList.add('active');
+
+            // 버튼 스타일 업데이트
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.replace('bg-indigo-600', 'bg-slate-800');
+                btn.classList.replace('text-white', 'text-slate-400');
+            });
+            const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(id));
+            if (activeBtn) {
+                activeBtn.classList.replace('bg-slate-800', 'bg-indigo-600');
+                activeBtn.classList.replace('text-slate-400', 'text-white');
+            }
+
+            document.getElementById('tab-hint').textContent = tabConfigs[id].hint;
+            resetCode();
+        }
+
+        function resetCode() {
+            editor.value = tabConfigs[activeTab].code;
+            applyStyle();
+        }
+
+        function applyStyle() {
+            styleTag.innerHTML = editor.value;
+        }
+
+        editor.addEventListener('input', applyStyle);
+
+        window.onload = () => {
+            setTab('concept');
+        };
+    </script>
+</body>
+</html>
