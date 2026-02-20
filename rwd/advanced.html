@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 9: Advanced RWD Mastery Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+        
+        body { font-family: 'Pretendard', sans-serif; background-color: #f1f5f9; }
+        .code-font { font-family: 'Fira Code', monospace; }
+
+        /* 공통 레이아웃 */
+        .level-section { display: none; }
+        .level-section.active { display: block; animation: slideUp 0.5s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .lab-card { background: white; border-radius: 16px; padding: 24px; shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .mission-box { background: #fff7ed; border-left: 4px solid #f97316; padding: 12px; margin-bottom: 20px; font-size: 13px; color: #9a3412; }
+
+        /* Level 2: 12-Column Grid System */
+        .grid-container { width: 100%; }
+        .grid-container::after { content: ""; clear: both; display: table; }
+        [class*="lv2-col-"] { float: left; padding: 10px; border: 1px solid rgba(255,255,255,0.3); background: #6366f1; color: white; text-align: center; font-size: 10px; }
+
+        /* Level 3: Aspect Ratio Media */
+        .video-wrapper { width: 100%; position: relative; background: #000; overflow: hidden; border-radius: 12px; }
+        .video-content { width: 100%; height: 100%; display: flex; items-center; justify-center; color: white; }
+
+        /* Level 4: Dashboard Layout */
+        .dash-layout { display: grid; gap: 1rem; }
+        .dash-sidebar { background: #1e293b; color: white; padding: 1rem; border-radius: 8px; }
+        .dash-main { background: #fff; padding: 1rem; border: 1px solid #e2e8f0; border-radius: 8px; }
+        .dash-card { background: #f8fafc; border: 1px solid #cbd5e1; height: 100px; border-radius: 4px; }
+
+        /* 에디터 스타일 */
+        #code-editor { width: 100%; height: 100%; background: transparent; color: #bae6fd; border: none; outline: none; resize: none; font-size: 13px; line-height: 1.6; }
+    </style>
+    <!-- 실시간 스타일 주입 -->
+    <style id="rwd-advanced-style"></style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- 상단 네비게이션: 레벨 선택 -->
+    <header class="h-16 bg-slate-900 text-white flex items-center justify-between px-6 shrink-0 z-50 shadow-xl">
+        <div class="flex items-center gap-8">
+            <div class="flex flex-col">
+                <span class="text-[10px] text-indigo-400 font-bold tracking-widest uppercase">Chapter 9 Advanced</span>
+                <h1 class="text-lg font-black whitespace-nowrap">RWD Mastery Lab</h1>
+            </div>
+            <nav class="flex gap-2 overflow-x-auto no-scrollbar">
+                <button onclick="setStep('lv1')" class="step-btn px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap bg-slate-800 text-slate-400">Level 1: 유동적 단위</button>
+                <button onclick="setStep('lv2')" class="step-btn px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap bg-slate-800 text-slate-400">Level 2: 12컬럼 그리드</button>
+                <button onclick="setStep('lv3')" class="step-btn px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap bg-slate-800 text-slate-400">Level 3: 미디어 최적화</button>
+                <button onclick="setStep('lv4')" class="step-btn px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap bg-slate-800 text-slate-400">Level 4: 대시보드 실무</button>
+            </nav>
+        </div>
+        <div class="hidden lg:flex items-center gap-3 bg-slate-800 px-4 py-2 rounded-lg border border-slate-700">
+            <span class="text-[10px] font-mono text-slate-400 uppercase">Width:</span>
+            <span id="screen-width" class="text-sm font-mono text-indigo-400 font-bold">0</span>
+            <span class="text-[10px] font-mono text-slate-400 uppercase">px</span>
+        </div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden">
+        <!-- 왼쪽: 실습 프리뷰 -->
+        <div class="flex-1 overflow-y-auto p-6 lg:p-12" id="preview-area">
+            
+            <!-- LEVEL 1: Fluid Typography & Scalable Units -->
+            <section id="lv1" class="level-section">
+                <div class="mission-box">
+                    <strong>Mission:</strong> 뷰포트 너비가 좁아질 때 제목 크기가 유연하게 줄어들도록 <code>clamp()</code> 함수와 <code>rem</code> 단위를 활용해 코딩하세요.
+                </div>
+                <div class="lab-card">
+                    <h2 class="fluid-title font-black leading-tight text-slate-800 mb-4">반응형 타이포그래피의 진화</h2>
+                    <p class="fluid-desc text-slate-600 leading-relaxed">
+                        고정된 <code>px</code> 단위는 모바일 환경에서 가독성을 해칠 수 있습니다. 
+                        상대 단위인 <code>rem</code>과 <code>vw</code>를 결합하여 모든 기기에서 최적화된 글자 크기를 제공해 보세요.
+                    </p>
+                </div>
+            </section>
+
+            <!-- LEVEL 2: Mathematical 12-Column Grid -->
+            <section id="lv2" class="level-section">
+                <div class="mission-box">
+                    <strong>Mission:</strong> W3Schools 가이드에 따라 미디어 쿼리를 사용하여, 데스크탑(3단) -> 태블릿(2단) -> 모바일(1단)로 변하는 그리드를 완성하세요.
+                </div>
+                <div class="lab-card">
+                    <div class="grid-container mb-4">
+                        <div class="lv2-col-4">Column 1 (4/12)</div>
+                        <div class="lv2-col-4">Column 2 (4/12)</div>
+                        <div class="lv2-col-4">Column 3 (4/12)</div>
+                    </div>
+                    <div class="grid-container">
+                        <div class="lv2-col-6">Half Width (6/12)</div>
+                        <div class="lv2-col-6">Half Width (6/12)</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- LEVEL 3: Responsive Media & Orientation -->
+            <section id="lv3" class="level-section">
+                <div class="mission-box">
+                    <strong>Mission:</strong> 비디오가 어떤 해상도에서도 16:9 비율을 유지하게 하고, 가로 모드(Landscape)일 때 테두리 색상이 변하도록 설정하세요.
+                </div>
+                <div class="lab-card flex flex-col gap-6">
+                    <div class="video-section">
+                        <span class="text-[10px] font-bold text-slate-400 mb-2 block">16:9 ASPECT RATIO VIDEO</span>
+                        <div class="video-wrapper aspect-test">
+                            <div class="video-content">
+                                <span class="text-xl font-black opacity-30 uppercase"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="image-section">
+                        <span class="text-[10px] font-bold text-slate-400 mb-2 block">ART DIRECTION IMAGE</span>
+                        <img src="https://www.w3schools.com/css/img_chania.jpg" class="art-img rounded-lg shadow-inner" alt="Chania">
+                    </div>
+                </div>
+            </section>
+
+            <!-- LEVEL 4: Complex Dashboard Layout (Advanced) -->
+            <section id="lv4" class="level-section">
+                <div class="mission-box">
+                    <strong>Mission:</strong> 992px 이상일 때는 왼쪽 사이드바 구조를, 그 이하일 때는 사이드바가 상단 메뉴로 올라가는 모바일 레이아웃을 구현하세요.
+                </div>
+                <div class="dash-layout admin-panel">
+                    <aside class="dash-sidebar">
+                        <h4 class="font-bold mb-4 text-xs">MENU</h4>
+                        <ul class="text-[10px] space-y-2 opacity-70">
+                            <li>📊 Analytics</li>
+                            <li>👥 Users</li>
+                            <li>⚙️ Settings</li>
+                        </ul>
+                    </aside>
+                    <main class="dash-main flex-1">
+                        <h3 class="font-black text-slate-800 mb-4">대시보드 통계</h3>
+                        <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="dash-card flex items-center justify-center text-[10px] font-bold text-slate-300 uppercase">Data A</div>
+                            <div class="dash-card flex items-center justify-center text-[10px] font-bold text-slate-300 uppercase">Data B</div>
+                            <div class="dash-card flex items-center justify-center text-[10px] font-bold text-slate-300 uppercase">Data C</div>
+                        </div>
+                    </main>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- 오른쪽: 라이브 코드 에디터 -->
+        <aside class="w-[450px] bg-slate-900 border-l-4 border-indigo-500 flex flex-col shrink-0 shadow-2xl relative">
+            <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.5)]"></div>
+                    <span class="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Advanced RWD Editor</span>
+                </div>
+                <button onclick="resetCurrentCode()" class="text-[10px] font-bold text-indigo-400 hover:text-white transition-colors underline">초기화</button>
+            </div>
+            
+            <div class="flex-1 p-5 bg-slate-950/50 overflow-hidden">
+                <textarea id="code-editor" spellcheck="false" class="code-font"></textarea>
+            </div>
+
+            <div class="p-5 bg-slate-900 border-t border-slate-800">
+                <div class="flex flex-col gap-2">
+                    <p class="text-[10px] text-slate-500 leading-relaxed">
+                        <span class="text-indigo-400 font-bold uppercase tracking-tighter mr-2">Hint:</span> 
+                        <span id="level-hint">현재 레벨에 맞는 코드를 확인하세요.</span>
+                    </p>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        const levels = {
+            lv1: {
+                hint: "clamp(최소, 기본, 최대)를 사용하여 제목 크기를 설정해 보세요.",
+                code: "/* [LEVEL 1] 유동적 타이포그래피 */\n.fluid-title {\n  /* 화면이 줄어들어도 최소 1.5rem 유지 */\n  font-size: clamp(1.5rem, 5vw + 1rem, 4rem) !important;\n}\n\n.fluid-desc {\n  font-size: 1.1rem;\n  margin-top: 1rem;\n}"
+            },
+            lv2: {
+                hint: "각 미디어 쿼리에서 너비(width)의 퍼센트를 계산하여 입력하세요.",
+                code: "/* [LEVEL 2] 12컬럼 반응형 그리드 */\n[class*='lv2-col-'] {\n  width: 100% !important; /* 기본 모바일: 1단 */\n}\n\n@media only screen and (min-width: 600px) {\n  /* 태블릿: 2단 (6/12 = 50%) */\n  .lv2-col-4, .lv2-col-6 { width: 50% !important; }\n}\n\n@media only screen and (min-width: 992px) {\n  /* 데스크탑: 3단 (4/12 = 33.33%) */\n  .lv2-col-4 { width: 33.33% !important; }\n  .lv2-col-6 { width: 50% !important; }\n}"
+            },
+            lv3: {
+                hint: "비디오의 aspect-ratio와 landscape 오리엔테이션 쿼리를 활용하세요.",
+                code: "/* [LEVEL 3] 미디어 비율 & 오리엔테이션 */\n.aspect-test {\n  /* 16:9 비율 유지 */\n  aspect-ratio: 16 / 9 !important;\n}\n\n.art-img {\n  max-width: 100% !important;\n  height: auto !important;\n}\n\n/* 가로 모드 기기(Landscape) 특별 스타일 */\n@media (orientation: landscape) {\n  .art-img {\n    border: 5px solid #6366f1 !important;\n    filter: brightness(1.1);\n  }\n}"
+            },
+            lv4: {
+                hint: "Grid의 template-columns를 미디어 쿼리에 따라 변경해 보세요.",
+                code: "/* [LEVEL 4] 실무 대시보드 레이아웃 */\n.admin-panel {\n  display: grid !important;\n  grid-template-columns: 1fr !important; /* 모바일: 1열 */\n}\n\n@media (min-width: 992px) {\n  .admin-panel {\n    grid-template-columns: 200px 1fr !important; /* 데스크탑: 사이드바 고정 */\n  }\n  \n  .dash-sidebar {\n    height: 100% !important;\n  }\n}\n\n.dash-card:hover {\n  border-color: #6366f1 !important;\n  transform: translateY(-2px);\n  transition: 0.3s;\n}"
+            }
+        };
+
+        let currentLevel = 'lv1';
+        const editor = document.getElementById('code-editor');
+        const styleTag = document.getElementById('rwd-advanced-style');
+
+        function setStep(id) {
+            currentLevel = id;
+            document.querySelectorAll('.level-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+
+            // 버튼 스타일
+            document.querySelectorAll('.step-btn').forEach(btn => {
+                btn.classList.replace('bg-indigo-600', 'bg-slate-800');
+                btn.classList.replace('text-white', 'text-slate-400');
+            });
+            const activeBtn = Array.from(document.querySelectorAll('.step-btn')).find(b => b.getAttribute('onclick').includes(id));
+            if (activeBtn) {
+                activeBtn.classList.replace('bg-slate-800', 'bg-indigo-600');
+                activeBtn.classList.replace('text-slate-400', 'text-white');
+            }
+
+            document.getElementById('level-hint').textContent = levels[id].hint;
+            resetCurrentCode();
+        }
+
+        function resetCurrentCode() {
+            editor.value = levels[currentLevel].code;
+            applyStyle();
+        }
+
+        function applyStyle() {
+            styleTag.innerHTML = editor.value;
+        }
+
+        editor.addEventListener('input', applyStyle);
+
+        window.addEventListener('resize', () => {
+            document.getElementById('screen-width').textContent = window.innerWidth;
+        });
+
+        window.onload = () => {
+            document.getElementById('screen-width').textContent = window.innerWidth;
+            setStep('lv1');
+        };
+    </script>
+</body>
+</html>
