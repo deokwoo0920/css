@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tailwind CSS Advanced Mastery Lab</title>
+    <!-- Tailwind CSS 3.4 CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+        .code-font { font-family: 'Fira Code', monospace; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-slate-900 h-screen overflow-hidden flex flex-col">
+
+    <!-- 상단 헤더 -->
+    <header class="h-16 border-b border-slate-800 flex items-center justify-between px-8 shrink-0 bg-slate-950 shadow-2xl">
+        <div class="flex items-center gap-6">
+            <h1 class="text-xl font-black text-sky-400 tracking-tighter uppercase">Tailwind Master</h1>
+            <nav class="flex gap-1">
+                <button onclick="loadTW('layout')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:bg-slate-800 transition">레이아웃/그리드</button>
+                <button onclick="loadTW('design')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:bg-slate-800 transition">디자인/그라데이션</button>
+                <button onclick="loadTW('state')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:bg-slate-800 transition">상태/그룹호버</button>
+                <button onclick="loadTW('motion')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:bg-slate-800 transition">모션/트랜스폼</button>
+            </nav>
+        </div>
+        <div class="text-[10px] text-slate-500 font-mono hidden md:block">BUILDING WITH ATOMIC CSS</div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden">
+        <!-- 왼쪽: 결과창 (Preview) -->
+        <div class="flex-1 overflow-y-auto p-12 bg-slate-50 relative shadow-inner" id="tw-preview">
+            <!-- 결과물이 여기에 렌더링됩니다 -->
+        </div>
+
+        <!-- 오른쪽: 코드 에디터 (Editor) -->
+        <aside class="w-[450px] border-l border-slate-800 flex flex-col shrink-0 bg-slate-950">
+            <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-sky-500 rounded-full animate-pulse"></div>
+                    <span class="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Atomic Syntax Editor</span>
+                </div>
+                <button onclick="resetTW()" class="text-[9px] bg-slate-800 text-slate-400 px-2 py-1 rounded hover:text-white">초기화</button>
+            </div>
+
+            <div class="flex-1 p-4 overflow-hidden">
+                <textarea id="tw-editor" spellcheck="false" class="w-full h-full bg-transparent text-sky-300 font-mono text-sm outline-none resize-none leading-relaxed" placeholder="Tailwind 클래스를 입력하세요..."></textarea>
+            </div>
+
+            <div class="p-4 bg-slate-900/50 border-t border-slate-800">
+                <p class="text-[10px] text-slate-500 leading-relaxed italic">
+                    <span class="text-sky-400 font-bold">INFO:</span> Tailwind는 <code>hover:</code>, <code>focus:</code>, <code>md:</code> 등의 접두사를 통해 강력한 제어가 가능합니다.
+                </p>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        const twData = {
+            layout: `<!-- 1. 고도화된 그리드 시스템 (Bento 스타일) -->
+<div class="grid grid-cols-4 grid-rows-2 gap-4 h-[400px]">
+  <div class="col-span-2 row-span-2 bg-indigo-600 rounded-3xl p-8 text-white flex flex-col justify-end shadow-2xl">
+    <h3 class="text-3xl font-black">Main Feature</h3>
+    <p class="opacity-70">Grid Span 2x2</p>
+  </div>
+  <div class="col-span-2 bg-slate-800 rounded-3xl p-6 text-white border border-slate-700">
+    <h4 class="text-xl font-bold">Side Content</h4>
+    <p class="text-slate-400 text-sm">Flex & Grid combination</p>
+  </div>
+  <div class="bg-emerald-500 rounded-3xl p-6 flex items-center justify-center text-3xl">🚀</div>
+  <div class="bg-amber-400 rounded-3xl p-6 flex items-center justify-center text-3xl">💎</div>
+</div>`,
+            design: `<!-- 2. 그라데이션, 그림자 및 복합 스타일링 -->
+<div class="flex flex-col items-center gap-10 py-10">
+  <!-- 네온 스타일 카드 -->
+  <div class="w-64 h-64 bg-slate-900 rounded-[2.5rem] flex items-center justify-center border-4 border-slate-800 shadow-[0_0_50px_-12px_rgba(56,189,248,0.5)]">
+    <div class="text-center">
+      <h2 class="text-4xl font-black bg-gradient-to-tr from-sky-400 to-indigo-500 bg-clip-text text-transparent italic">NEON</h2>
+      <p class="text-slate-500 text-xs tracking-[0.5em] mt-2">EST. 2026</p>
+    </div>
+  </div>
+  
+  <!-- 유리병(Glassmorphism) 효과 -->
+  <div class="relative w-full max-w-md h-32 bg-white/30 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl flex items-center px-8">
+    <div class="w-12 h-12 bg-white rounded-full shadow-inner"></div>
+    <div class="ml-4">
+      <div class="h-2 w-32 bg-slate-200 rounded mb-2"></div>
+      <div class="h-2 w-20 bg-slate-100 rounded"></div>
+    </div>
+  </div>
+</div>`,
+            state: `<!-- 3. 인터랙티브 상태 제어 (Group Hover) -->
+<div class="max-w-sm mx-auto group cursor-pointer">
+  <div class="relative overflow-hidden rounded-3xl bg-indigo-500 aspect-square shadow-2xl transition-all duration-500 group-hover:shadow-indigo-500/40">
+    <!-- 호버 시 확대되는 배경 -->
+    <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+    
+    <!-- 호버 시 나타나는 텍스트 -->
+    <div class="absolute inset-0 flex flex-col justify-end p-8 translate-y-8 group-hover:translate-y-0 transition-transform duration-500">
+      <h4 class="text-2xl font-bold text-white">Reveal on Hover</h4>
+      <p class="text-indigo-200 text-sm mt-2">Tailwind 'group-hover' allows parent state to control child elements.</p>
+    </div>
+  </div>
+  <p class="text-center mt-4 text-slate-400 font-medium group-hover:text-indigo-600 transition-colors">이곳에 마우스를 올려보세요</p>
+</div>`,
+            motion: `<!-- 4. 모션 & 트랜스폼 실습 -->
+<div class="flex flex-wrap justify-center gap-12 py-20">
+  <!-- 회전 및 스케일 -->
+  <div class="w-32 h-32 bg-rose-500 rounded-2xl shadow-lg transform transition-all duration-700 hover:rotate-[360deg] hover:scale-125 hover:rounded-[4rem] flex items-center justify-center text-white font-black">
+    SPIN
+  </div>
+  
+  <!-- 기울기 및 그림자 변화 -->
+  <div class="w-32 h-32 bg-amber-400 rounded-2xl shadow-md transform transition-all duration-500 hover:-translate-y-4 hover:skew-x-12 hover:shadow-2xl flex items-center justify-center text-amber-900 font-black">
+    FLOAT
+  </div>
+
+  <!-- 필터 애니메이션 -->
+  <div class="w-32 h-32 bg-sky-400 rounded-2xl shadow-lg transition-all duration-500 hover:grayscale hover:blur-[2px] flex items-center justify-center text-sky-900 font-black">
+    FILTER
+  </div>
+</div>`
+        };
+
+        const twEditor = document.getElementById('tw-editor');
+        const twPreview = document.getElementById('tw-preview');
+        let activeTWTab = 'layout';
+
+        twEditor.addEventListener('input', () => {
+            twPreview.innerHTML = twEditor.value;
+        });
+
+        function loadTW(id) {
+            activeTWTab = id;
+            twEditor.value = twData[id];
+            twPreview.innerHTML = twData[id];
+        }
+
+        function resetTW() {
+            loadTW(activeTWTab);
+        }
+
+        window.onload = () => loadTW('layout');
+    </script>
+</body>
+</html>
