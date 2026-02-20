@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tailwind Hard - Bento Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white p-6 md:p-20">
+    <!-- 난이도 상: 베토 그리드(Bento Grid), 그룹 호버, 복합 변형(Transform), 배경 블러 -->
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-5xl md:text-8xl font-black tracking-tighter mb-20 italic">WORKS.</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- 2x2 사이즈 카드 -->
+            <div class="md:col-span-2 md:row-span-2 group relative overflow-hidden rounded-[2.5rem] bg-zinc-900 cursor-pointer">
+                <div class="absolute inset-0 bg-gradient-to-tr from-indigo-500 to-purple-500 opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
+                <div class="relative h-[400px] flex flex-col justify-end p-10">
+                    <h3 class="text-4xl font-black mb-2">Project Alpha</h3>
+                    <p class="text-white/60">Modern UI/UX Design System</p>
+                </div>
+            </div>
+
+            <!-- 2x1 가로 카드 -->
+            <div class="md:col-span-2 group relative overflow-hidden rounded-[2.5rem] bg-zinc-900 h-[200px] flex items-center p-10 border border-white/10 hover:border-white/30 transition-all">
+                <div class="flex-1">
+                    <h4 class="text-xl font-bold">Concept Study</h4>
+                    <p class="text-zinc-500 text-sm">Experimental web motion</p>
+                </div>
+                <div class="text-4xl group-hover:rotate-12 transition-transform">🎨</div>
+            </div>
+
+            <!-- 1x1 정비율 카드 -->
+            <div class="group relative overflow-hidden rounded-[2.5rem] bg-emerald-500 h-[200px] flex flex-col items-center justify-center text-black font-black">
+                <span class="text-4xl mb-2">99%</span>
+                <span class="text-xs uppercase">Success Rate</span>
+            </div>
+
+            <div class="group relative overflow-hidden rounded-[2.5rem] bg-zinc-900 border border-white/5 h-[200px] flex items-center justify-center overflow-hidden">
+                <div class="absolute inset-0 bg-[url('https://picsum.photos/id/10/400/400')] bg-cover opacity-20 grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-500"></div>
+                <span class="relative font-bold text-xs uppercase tracking-widest">Photography</span>
+            </div>
+
+            <!-- 하단 가로 긴 카드 -->
+            <div class="md:col-span-4 group relative overflow-hidden rounded-[2.5rem] bg-white text-black p-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div>
+                    <h3 class="text-2xl font-black">Let's build something great.</h3>
+                    <p class="text-zinc-500">Available for freelance projects.</p>
+                </div>
+                <button class="bg-black text-white px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform active:scale-95 shadow-xl">Contact Me</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
