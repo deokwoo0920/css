@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <!-- [중요] RWD의 시작: Viewport 설정 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 9: 반응형 웹 실습 Master Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+        
+        body { font-family: sans-serif; background-color: #f8fafc; }
+        .code-font { font-family: 'Fira Code', monospace; }
+
+        /* 공통 프리뷰 스타일 */
+        .example-section { display: none; }
+        .example-section.active { display: block; animation: fadeIn 0.4s ease-out; }
+        .preview-container { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); min-height: 200px; }
+        
+        /* [예제 1] 기초 단위 */
+        .fixed-box { width: 300px; background: #ef4444; color: white; padding: 10px; margin-bottom: 10px; }
+        .fluid-box { width: 80%; background: #22c55e; color: white; padding: 10px; }
+
+        /* [예제 3] 12컬럼 그리드 */
+        .row::after { content: ""; clear: both; display: table; }
+        [class*="col-"] { float: left; padding: 10px; border: 1px solid white; background: #6366f1; color: white; text-align: center; font-size: 12px; font-weight: bold; }
+        .col-4 { width: 33.33%; }
+        .col-6 { width: 50%; }
+        .col-12 { width: 100%; }
+
+        /* [예제 5] 실무형 카드 */
+        .card-container { display: flex; flex-wrap: wrap; gap: 15px; }
+        .card { flex: 1 1 calc(33.33% - 15px); background: white; border: 1px solid #eee; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .card-img { width: 100%; aspect-ratio: 16/9; background: #ddd; display: flex; align-items: center; justify-content: center; }
+
+        /* 애니메이션 */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 에디터 스타일 */
+        #live-editor { width: 100%; height: 100%; background: transparent; color: #93c5fd; border: none; outline: none; resize: none; font-size: 13px; line-height: 1.6; }
+    </style>
+    <!-- 실시간 스타일 반영 태그 -->
+    <style id="rwd-live-style"></style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- 상단 네비게이션 -->
+    <header class="h-16 bg-slate-900 text-white flex items-center justify-between px-6 shrink-0 z-50">
+        <div class="flex items-center gap-6">
+            <h1 class="text-lg font-bold text-indigo-400 whitespace-nowrap">RWD Master Lab</h1>
+            <nav class="flex gap-1 overflow-x-auto no-scrollbar">
+                <button onclick="loadExample('ex1', event)" class="nav-item px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap">1. 기초 단위</button>
+                <button onclick="loadExample('ex2', event)" class="nav-item px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap">2. 미디어 쿼리</button>
+                <button onclick="loadExample('ex3', event)" class="nav-item px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap">3. 12컬럼 그리드</button>
+                <button onclick="loadExample('ex4', event)" class="nav-item px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap">4. 이미지/비디오</button>
+                <button onclick="loadExample('ex5', event)" class="nav-item px-3 py-1.5 rounded text-xs font-bold whitespace-nowrap">5. 실무 카드 UI</button>
+            </nav>
+        </div>
+        <div class="hidden md:block text-[10px] text-slate-500 uppercase tracking-widest font-mono">Window Width: <span id="win-width" class="text-indigo-400">0</span>px</div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden">
+        <!-- 왼쪽: 프리뷰 영역 -->
+        <div class="flex-1 overflow-y-auto p-6 md:p-10" id="preview-area">
+            
+            <!-- [예제 1] 기초 단위 -->
+            <section id="ex1" class="example-section">
+                <h2 class="text-xl font-bold mb-4">1. 고정 너비(px) vs 가변 너비(%)</h2>
+                <div class="preview-container">
+                    <div class="fixed-box">고정 너비: 300px (화면이 작아져도 유지)</div>
+                    <div class="fluid-box">가변 너비: 80% (화면 너비에 반응)</div>
+                </div>
+                <p class="mt-4 text-sm text-slate-500 italic">* 브라우저 창을 줄여서 빨간색 박스가 잘리는지 확인해보세요.</p>
+            </section>
+
+            <!-- [예제 2] 미디어 쿼리 -->
+            <section id="ex2" class="example-section">
+                <h2 class="text-xl font-bold mb-4">2. 미디어 쿼리 중단점 테스트</h2>
+                <div class="preview-container media-bg-target transition-colors duration-500 flex items-center justify-center text-center">
+                    <p class="media-text font-black text-2xl uppercase text-slate-300 tracking-tighter">Desktop View</p>
+                </div>
+                <p class="mt-4 text-sm text-slate-500 italic">* 에디터의 @media 구문을 수정해 배경색이 변하는 시점을 바꿔보세요.</p>
+            </section>
+
+            <!-- [예제 3] 12컬럼 그리드 -->
+            <section id="ex3" class="example-section">
+                <h2 class="text-xl font-bold mb-4">3. 12컬럼 시스템 (Grid View)</h2>
+                <div class="preview-container">
+                    <div class="row mb-2">
+                        <div class="col-12" style="background:#1e293b">Header (12)</div>
+                    </div>
+                    <div class="row mb-2 grid-responsive-row">
+                        <div class="col-4">Column 4</div>
+                        <div class="col-4">Column 4</div>
+                        <div class="col-4">Column 4</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12" style="background:#1e293b">Footer (12)</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- [예제 4] 이미지/비디오 -->
+            <section id="ex4" class="example-section">
+                <h2 class="text-xl font-bold mb-4">4. 반응형 미디어 제어</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="preview-container">
+                        <span class="text-[10px] font-bold text-indigo-500 block mb-2 uppercase">Image</span>
+                        <img src="https://www.w3schools.com/css/img_chania.jpg" class="responsive-img-target" alt="Test">
+                    </div>
+                    <div class="preview-container">
+                        <span class="text-[10px] font-bold text-indigo-500 block mb-2 uppercase">Video</span>
+                        <iframe class="responsive-video-target" src="https://www.youtube.com/embed/tgbNymZ7vqY" frameborder="0"></iframe>
+                    </div>
+                </div>
+            </section>
+
+            <!-- [예제 5] 실무 카드 UI -->
+            <section id="ex5" class="example-section">
+                <h2 class="text-xl font-bold mb-4">5. 실무형 자동 재배치 카드 리스트</h2>
+                <div class="card-container">
+                    <div class="card">
+                        <div class="card-img">IMAGE 1</div>
+                        <div class="p-3"><h4 class="font-bold text-sm">Product Title</h4><p class="text-[10px] text-slate-500">설명 텍스트가 들어가는 자리입니다.</p></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-img">IMAGE 2</div>
+                        <div class="p-3"><h4 class="font-bold text-sm">Product Title</h4><p class="text-[10px] text-slate-500">설명 텍스트가 들어가는 자리입니다.</p></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-img">IMAGE 3</div>
+                        <div class="p-3"><h4 class="font-bold text-sm">Product Title</h4><p class="text-[10px] text-slate-500">설명 텍스트가 들어가는 자리입니다.</p></div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- 오른쪽: 실시간 코드 에디터 -->
+        <aside class="w-[400px] bg-slate-900 border-l-4 border-indigo-500 flex flex-col shrink-0 shadow-2xl">
+            <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span class="text-[11px] font-bold text-slate-300 uppercase tracking-widest">RWD Code Editor</span>
+                </div>
+                <button onclick="insertTemplate()" class="text-[9px] bg-indigo-600 text-white px-2 py-1 rounded">초기화</button>
+            </div>
+            <div class="flex-1 p-4 bg-slate-950/50">
+                <textarea id="live-editor" spellcheck="false" class="code-font"></textarea>
+            </div>
+            <div class="p-4 bg-slate-900 border-t border-slate-800">
+                <p class="text-[10px] text-slate-500 leading-relaxed italic">
+                    * 에디터에 입력한 CSS는 즉시 왼쪽 화면에 반영됩니다. 브라우저 크기를 조절하며 테스트하세요.
+                </p>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        const config = {
+            ex1: {
+                title: "기초 단위",
+                code: "/* [실습 1] 너비 단위 비교 */\n.fluid-box {\n  width: 90% !important;\n  background: #22c55e !important;\n}\n\n.fixed-box {\n  width: 300px !important;\n  background: #ef4444 !important;\n}"
+            },
+            ex2: {
+                title: "미디어 쿼리",
+                code: "/* [실습 2] 브레이크포인트 설정 */\n@media only screen and (max-width: 768px) {\n  .media-bg-target {\n    background-color: #fef2f2 !important;\n  }\n  .media-text {\n    content: 'Tablet View' !important;\n    color: #f87171 !important;\n  }\n}\n\n@media only screen and (max-width: 600px) {\n  .media-bg-target {\n    background-color: #f0fdf4 !important;\n  }\n  .media-text {\n    content: 'Mobile View' !important;\n    color: #22c55e !important;\n  }\n}"
+            },
+            ex3: {
+                title: "12컬럼 그리드",
+                code: "/* [실습 3] 12컬럼 반응형 레이아웃 */\n.grid-responsive-row [class*='col-'] {\n  width: 33.33% !important;\n}\n\n@media only screen and (max-width: 768px) {\n  /* 모바일/태블릿에서는 1줄로 변경 */\n  .grid-responsive-row [class*='col-'] {\n    width: 100% !important;\n    margin-bottom: 5px;\n  }\n}"
+            },
+            ex4: {
+                title: "이미지/비디오",
+                code: "/* [실습 4] 가변 이미지/비디오 법칙 */\n.responsive-img-target {\n  max-width: 100% !important;\n  height: auto !important;\n  border-radius: 8px;\n}\n\n.responsive-video-target {\n  width: 100% !important;\n  aspect-ratio: 16/9 !important;\n  border-radius: 8px;\n}"
+            },
+            ex5: {
+                title: "실무 카드 UI",
+                code: "/* [실습 5] 실무형 카드 자동 재배치 */\n.card {\n  flex: 1 1 calc(33.33% - 15px) !important;\n  transition: 0.3s;\n}\n\n@media only screen and (max-width: 900px) {\n  .card { flex: 1 1 calc(50% - 15px) !important; }\n}\n\n@media only screen and (max-width: 600px) {\n  .card { flex: 1 1 100% !important; }\n}"
+            }
+        };
+
+        let currentId = 'ex1';
+        const editor = document.getElementById('live-editor');
+        const styleTag = document.getElementById('rwd-live-style');
+
+        // 예제 로드
+        function loadExample(id, event = null) {
+            currentId = id;
+            
+            // 섹션 활성화
+            document.querySelectorAll('.example-section').forEach(s => s.classList.remove('active'));
+            const targetSection = document.getElementById(id);
+            if (targetSection) targetSection.classList.add('active');
+            
+            // 버튼 스타일 초기화
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white');
+                btn.classList.add('text-slate-400');
+            });
+
+            // 현재 클릭된 버튼 또는 id에 해당하는 버튼 활성화
+            let targetBtn = event ? event.currentTarget : null;
+            if (!targetBtn) {
+                targetBtn = Array.from(navItems).find(btn => btn.getAttribute('onclick').includes(`'${id}'`));
+            }
+
+            if (targetBtn) {
+                targetBtn.classList.add('bg-indigo-600', 'text-white');
+                targetBtn.classList.remove('text-slate-400');
+            }
+            
+            insertTemplate();
+        }
+
+        function insertTemplate() {
+            editor.value = config[currentId].code;
+            applyStyle();
+        }
+
+        function applyStyle() {
+            styleTag.innerHTML = editor.value;
+        }
+
+        editor.addEventListener('input', applyStyle);
+
+        // 윈도우 크기 감시
+        window.addEventListener('resize', () => {
+            document.getElementById('win-width').textContent = window.innerWidth;
+        });
+
+        window.onload = () => {
+            document.getElementById('win-width').textContent = window.innerWidth;
+            loadExample('ex1'); // 초기 실행 시 event 없이 호출됨
+        };
+    </script>
+</body>
+</html>
