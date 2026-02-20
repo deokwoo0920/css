@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 10: CSS Grid Mastery Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap');
+        
+        body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; background-color: #f8fafc; }
+        .code-font { font-family: 'Fira Code', monospace; }
+
+        /* 공통 프리뷰 스타일 */
+        .grid-node { display: none; }
+        .grid-node.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .lab-card { background: white; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .target-label { font-size: 10px; font-weight: 800; color: #6366f1; text-transform: uppercase; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 4px; }
+        .target-label::before { content: ''; width: 6px; height: 6px; background: currentColor; border-radius: 50%; }
+
+        /* Grid Visual Guide */
+        .grid-display { background: #f1f5f9; padding: 15px; border-radius: 12px; min-height: 250px; position: relative; }
+        .grid-item { 
+            background: #6366f1; color: white; display: flex; align-items: center; justify-content: center; 
+            font-weight: bold; border-radius: 8px; border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        /* 에디터 스타일 */
+        #code-editor { width: 100%; height: 100%; background: transparent; color: #bae6fd; border: none; outline: none; resize: none; font-size: 13px; line-height: 1.6; }
+        
+        /* 스크롤바 커스텀 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+    <!-- 실시간 스타일 주입 -->
+    <style id="grid-live-style"></style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- 상단 헤더: 주제 선택 -->
+    <header class="h-16 bg-slate-900 text-white flex items-center justify-between px-6 shrink-0 z-50 shadow-xl">
+        <div class="flex items-center gap-8">
+            <div class="flex flex-col">
+                <span class="text-[10px] text-indigo-400 font-bold tracking-widest uppercase">Chapter 10 Mastery</span>
+                <h1 class="text-lg font-black whitespace-nowrap tracking-tight">CSS Grid System</h1>
+            </div>
+            <nav class="flex gap-2 overflow-x-auto no-scrollbar">
+                <button onclick="setGridTab('intro')" class="grid-tab-btn px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap bg-slate-800 text-slate-400">1. 그리드 기초</button>
+                <button onclick="setGridTab('container')" class="grid-tab-btn px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap bg-slate-800 text-slate-400">2. 컨테이너 속성</button>
+                <button onclick="setGridTab('item')" class="grid-tab-btn px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap bg-slate-800 text-slate-400">3. 아이템 배치</button>
+                <button onclick="setGridTab('bento')" class="grid-tab-btn px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap bg-slate-800 text-slate-400">4. 실무 패턴 (Bento)</button>
+            </nav>
+        </div>
+        <button onclick="resetGridCode()" class="text-[10px] font-bold text-slate-400 hover:text-white bg-slate-800 px-3 py-1.5 rounded border border-slate-700 transition">초기화</button>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden">
+        <!-- 왼쪽: 실습 프리뷰 -->
+        <div class="flex-1 overflow-y-auto p-6 lg:p-10" id="preview-area">
+            
+            <!-- 1. 그리드 기초 -->
+            <section id="intro" class="grid-node space-y-6">
+                <div class="lab-card">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">왜 Grid 인가?</h3>
+                    <p class="text-sm text-slate-600 mb-6 leading-relaxed">
+                        Flexbox는 한 번에 행 또는 열 중 하나만 다루는 1차원 도구입니다. 반면 <strong>Grid는 2차원</strong>이므로, 아래와 같은 복잡한 격자 구조를 매우 간결한 코드로 정의할 수 있습니다.
+                    </p>
+                    <span class="target-label">Basic 3x3 Grid</span>
+                    <div class="grid-display intro-grid-container">
+                        <div class="grid-item">1</div> <div class="grid-item">2</div> <div class="grid-item">3</div>
+                        <div class="grid-item">4</div> <div class="grid-item">5</div> <div class="grid-item">6</div>
+                        <div class="grid-item">7</div> <div class="grid-item">8</div> <div class="grid-item">9</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. 컨테이너 속성 -->
+            <section id="container" class="grid-node space-y-6">
+                <div class="lab-card">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">컨테이너 제어 (Parent)</h3>
+                    <p class="text-sm text-slate-600 mb-6">부모 요소에서 전체적인 칸의 크기와 개수, 간격을 설계합니다.</p>
+                    
+                    <span class="target-label">Template Columns & Rows 실습</span>
+                    <div class="grid-display container-grid-parent">
+                        <div class="grid-item bg-pink-500">A</div>
+                        <div class="grid-item bg-blue-500">B</div>
+                        <div class="grid-item bg-green-500">C</div>
+                        <div class="grid-item bg-amber-500">D</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. 아이템 배치 -->
+            <section id="item" class="grid-node space-y-6">
+                <div class="lab-card">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">아이템 배치 (Children)</h3>
+                    <p class="text-sm text-slate-600 mb-6">특정 아이템이 몇 칸을 차지할지, 어디서 시작할지 선 번호를 이용해 결정합니다.</p>
+                    
+                    <span class="target-label">Column/Row Spanning</span>
+                    <div class="grid-display item-grid-parent" style="display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 100px); gap: 10px;">
+                        <div class="grid-item item-target-1 bg-rose-500">SPAN ITEM</div>
+                        <div class="grid-item bg-slate-400">2</div>
+                        <div class="grid-item bg-slate-400">3</div>
+                        <div class="grid-item bg-slate-400">4</div>
+                        <div class="grid-item bg-slate-400">5</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. 실무 패턴 (Bento Grid) -->
+            <section id="bento" class="grid-node space-y-6">
+                <div class="lab-card">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-slate-800 tracking-tight">Modern Bento Grid</h3>
+                        <span class="text-[10px] bg-indigo-100 text-indigo-600 px-2 py-1 rounded font-bold">Trend 2026</span>
+                    </div>
+                    <div class="grid-display bento-grid-container">
+                        <div class="grid-item bento-1 bg-indigo-600">Feature 1</div>
+                        <div class="grid-item bento-2 bg-slate-800">Feature 2</div>
+                        <div class="grid-item bento-3 bg-indigo-400">Feature 3</div>
+                        <div class="grid-item bento-4 bg-slate-700">Feature 4</div>
+                        <div class="grid-item bento-5 bg-indigo-500">Feature 5</div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- 오른쪽: 라이브 코드 에디터 -->
+        <aside class="w-[450px] bg-slate-900 border-l-4 border-indigo-500 flex flex-col shrink-0 shadow-2xl relative">
+            <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.5)]"></div>
+                    <span class="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Grid System Editor</span>
+                </div>
+            </div>
+            
+            <div class="flex-1 p-5 bg-slate-950/50 overflow-hidden">
+                <textarea id="code-editor" spellcheck="false" class="code-font"></textarea>
+            </div>
+
+            <div class="p-5 bg-slate-900 border-t border-slate-800">
+                <div class="flex flex-col gap-2">
+                    <p class="text-[10px] text-slate-500 leading-relaxed italic">
+                        <span class="text-indigo-400 font-bold uppercase tracking-tighter mr-2">Tip:</span> 
+                        <span id="grid-hint">그리드 라인 번호를 생각하며 코딩하세요.</span>
+                    </p>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        const gridConfigs = {
+            intro: {
+                hint: "display: grid; 와 grid-template-columns를 사용해 칸을 나눕니다.",
+                code: "/* [1] 기본 3열 그리드 정의 */\n.intro-grid-container {\n  display: grid !important;\n  /* 3개의 열을 동일한 비율(1fr)로 생성 */\n  grid-template-columns: 1fr 1fr 1fr !important;\n  /* 3개의 행을 80px 높이로 생성 */\n  grid-template-rows: 80px 80px 80px !important;\n  gap: 15px !important;\n}"
+            },
+            container: {
+                hint: "fr 단위를 섞어서 사용하면 유연한 레이아웃을 만들 수 있습니다.",
+                code: "/* [2] 복합 비율 컨테이너 실습 */\n.container-grid-parent {\n  display: grid !important;\n  /* 첫 번째 열은 200px 고정, 나머지는 2:1 비율 */\n  grid-template-columns: 200px 2fr 1fr !important;\n  grid-template-rows: 150px 100px !important;\n  gap: 10px !important;\n  /* 아이템들을 수직/수평 중앙 정렬 */\n  align-items: stretch !important;\n  justify-items: stretch !important;\n}"
+            },
+            item: {
+                hint: "grid-column: 시작선 / 끝선; 형식을 사용하세요.",
+                code: "/* [3] 개별 아이템 위치 지정 */\n.item-target-1 {\n  /* 1번 세로선부터 3번 세로선까지 (2칸 차지) */\n  grid-column: 1 / 3 !important;\n  /* 1번 가로선부터 3번 가로선까지 (2칸 차지) */\n  grid-row: 1 / 3 !important;\n  background: #f43f5e !important;\n  z-index: 10;\n}"
+            },
+            bento: {
+                hint: "grid-template-areas를 사용해 시각적인 설계도를 그려보세요.",
+                code: "/* [4] 베토 그리드 실무 패턴 */\n.bento-grid-container {\n  display: grid !important;\n  grid-template-columns: repeat(4, 1fr) !important;\n  grid-template-rows: repeat(2, 120px) !important;\n  gap: 15px !important;\n}\n\n.bento-1 { grid-column: span 2; grid-row: span 2; } /* 큰 카드 */\n.bento-2 { grid-column: span 2; } /* 가로 카드 */\n.bento-3 { background: #10b981 !important; }\n.bento-4 { background: #f59e0b !important; }\n"
+            }
+        };
+
+        let activeGridTab = 'intro';
+        const editor = document.getElementById('code-editor');
+        const styleTag = document.getElementById('grid-live-style');
+
+        function setGridTab(id) {
+            activeGridTab = id;
+            document.querySelectorAll('.grid-node').forEach(node => node.classList.remove('active'));
+            const targetNode = document.getElementById(id);
+            if (targetNode) targetNode.classList.add('active');
+
+            // 버튼 스타일 업데이트
+            document.querySelectorAll('.grid-tab-btn').forEach(btn => {
+                btn.classList.replace('bg-indigo-600', 'bg-slate-800');
+                btn.classList.replace('text-white', 'text-slate-400');
+            });
+            const activeBtn = Array.from(document.querySelectorAll('.grid-tab-btn')).find(b => b.getAttribute('onclick').includes(id));
+            if (activeBtn) {
+                activeBtn.classList.replace('bg-slate-800', 'bg-indigo-600');
+                activeBtn.classList.replace('text-white', 'text-white');
+            }
+
+            document.getElementById('grid-hint').textContent = gridConfigs[id].hint;
+            resetGridCode();
+        }
+
+        function resetGridCode() {
+            editor.value = gridConfigs[activeGridTab].code;
+            applyGridStyle();
+        }
+
+        function applyGridStyle() {
+            styleTag.innerHTML = editor.value;
+        }
+
+        editor.addEventListener('input', applyGridStyle);
+
+        window.onload = () => {
+            setGridTab('intro');
+        };
+    </script>
+</body>
+</html>
